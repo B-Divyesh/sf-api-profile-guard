@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4efd9" />
+    <meta name="description" content="A local CLI preflight that blocks API requests aimed at the wrong environment before any network connection opens." />
+    <meta property="og:title" content="API Profile Guard — know where the request is going" />
+    <meta property="og:description" content="Resolve the profile. Inspect the policy. Release the request." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/preflight-gate.webp" />
+    <link rel="canonical" href="https://api-profile-guard.sociobot.in/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <title>API Profile Guard — local preflight for safer API requests</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <div id="network-status" class="network-status" role="status" hidden></div>
+    <header class="masthead">
+      <a class="brand" href="/" aria-label="API Profile Guard home">
+        <svg aria-hidden="true" width="34" height="34" viewBox="0 0 34 34">
+          <path d="M4 3h18v7h8v21H4z" fill="none" stroke="currentColor" stroke-width="3" />
+          <path d="M10 18l4 4 10-11" fill="none" stroke="currentColor" stroke-width="3" />
+        </svg>
+        <span><b>API</b> Profile Guard</span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#simulator">Try preflight</a>
+        <a href="#policy">Policy model</a>
+        <a href="https://github.com/B-Divyesh/sf-api-profile-guard">Source</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow"><span>Local safety checkpoint</span> / v0.1.0</p>
+          <h1 id="hero-title">Know where the request is going.</h1>
+          <p class="lede">Resolve the profile. Inspect the policy. Release the request—only when host, operation, body, and credential class agree.</p>
+          <div class="install-strip" aria-label="Install command">
+            <code id="install-command">cargo install api-profile-guard</code>
+            <button class="copy-button" type="button" data-copy="#install-command">Copy</button>
+          </div>
+          <div class="hero-actions">
+            <a class="button primary" href="#simulator">Try the preflight</a>
+            <a class="button text-link" href="https://github.com/B-Divyesh/sf-api-profile-guard">Read the source <span aria-hidden="true">↗</span></a>
+          </div>
+          <p class="proof-line"><span>✓ no account</span><span>✓ no telemetry</span><span>✓ no secret upload</span></p>
+        </div>
+        <figure class="hero-art">
+          <img src="/preflight-gate.webp" srcset="/preflight-gate-720.webp 720w, /preflight-gate.webp 1200w" sizes="(max-width: 800px) calc(100vw - 52px), (max-width: 1260px) 48vw, 560px" width="1200" height="800" alt="Three streams of request tokens meet a mechanical inspection gate; one safe stream passes while a red stop paddle blocks another." fetchpriority="high" />
+          <figcaption><b>Fig. 01</b> The guard opens only after the resolved profile matches policy.</figcaption>
+        </figure>
+      </section>
+
+      <section class="sequence" aria-label="Three-stage preflight">
+        <ol>
+          <li><span>01</span><strong>Resolve</strong><small>Literal dotenv, required keys, credential class</small></li>
+          <li><span>02</span><strong>Inspect</strong><small>Exact host, method + path, JSON body fields</small></li>
+          <li><span>03</span><strong>Release</strong><small>Explicit production phrase, then spawn client</small></li>
+        </ol>
+      </section>
+
+      <section id="simulator" class="simulator section-grid" aria-labelledby="simulator-title">
+        <div class="section-heading">
+          <p class="section-number">Field test / 02</p>
+          <h2 id="simulator-title">Run a local preflight</h2>
+          <p>This simulator mirrors the CLI’s deny-first decision order. It makes no request and stores nothing.</p>
+        </div>
+        <form id="preflight-form" class="preflight-panel">
+          <div class="form-grid">
+            <div class="field">
+              <label for="profile">Profile</label>
+              <select id="profile" name="profile">
+                <option value="development">development · test</option>
+                <option value="staging">staging · test</option>
+                <option value="production">production · live</option>
+              </select>
+            </div>
+            <div class="field method-field">
+              <label for="method">Method</label>
+              <select id="method" name="method">
+                <option>GET</option>
+                <option>POST</option>
+                <option>PUT</option>
+                <option>PATCH</option>
+                <option>DELETE</option>
+              </select>
+            </div>
+            <div class="field url-field">
+              <label for="request-url">URL or path</label>
+              <input id="request-url" name="request-url" value="/v1/orders" required spellcheck="false" aria-describedby="url-hint" />
+              <small id="url-hint">Try a forbidden host: https://wrong.example/v1/orders</small>
+            </div>
+            <div id="acknowledgement-field" class="field ack-field" hidden>
+              <label for="acknowledgement">Production phrase</label>
+              <input id="acknowledgement" name="acknowledgement" autocomplete="off" spellcheck="false" aria-describedby="ack-hint" />
+              <small id="ack-hint">Type production exactly. No confirmation dialog.</small>
+            </div>
+          </div>
+          <button id="inspect-button" class="button primary inspect-button" type="submit">Inspect request</button>
+        </form>
+        <div id="preflight-result" class="result-sheet" data-state="empty" aria-live="polite" aria-atomic="true">
+          <p id="result-stamp" class="result-stamp">READY</p>
+          <div>
+            <h3 id="result-title">No request inspected yet.</h3>
+            <p id="result-details">Choose a profile and operation, then run the policy check.</p>
+            <ul id="result-reasons"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="policy" class="policy-section section-grid" aria-labelledby="policy-title">
+        <div class="section-heading">
+          <p class="section-number">Policy plate / 03</p>
+          <h2 id="policy-title">Production is not a color.</h2>
+          <p>A theme can be missed. A failing policy cannot. Production requires an exact host, an explicit operation allowlist, and a typed acknowledgement.</p>
+        </div>
+        <div class="policy-specimen">
+          <div class="specimen-bar"><span>apg.toml</span><span>local / reviewable</span></div>
+          <pre tabindex="0" aria-label="Production profile example"><code><span class="comment"># Secrets stay in .env.prod</span>
+[profiles.production]
+env_file = <span class="string">".env.prod"</span>
+required = [<span class="string">"API_BASE_URL"</span>, <span class="string">"API_TOKEN"</span>]
+credential_class = <span class="string">"live"</span>
+production = <span class="value">true</span>
+acknowledgement = <span class="string">"production"</span>
+
+allowed_hosts = [<span class="string">"api.example.com"</span>]
+allow = [<span class="string">"GET /v1/*"</span>, <span class="string">"POST /v1/orders"</span>]
+deny = [<span class="string">"* /v1/admin/*"</span>]</code></pre>
+        </div>
+        <div class="guard-claims">
+          <article><span aria-hidden="true">⊘</span><h3>No shell evaluation</h3><p>Dotenv values are parsed as literals. Expansion and substitution are rejected.</p></article>
+          <article><span aria-hidden="true">⌁</span><h3>No secret receipts</h3><p>Receipts record the decision and non-secret fingerprint—not headers, values, queries, or bodies.</p></article>
+          <article><span aria-hidden="true">↯</span><h3>No early connection</h3><p><code>apg run</code> does not spawn curl, Bruno, or your script until every check passes.</p></article>
+        </div>
+      </section>
+
+      <section class="terminal-section section-grid" aria-labelledby="terminal-title">
+        <div class="section-heading">
+          <p class="section-number">Release record / 04</p>
+          <h2 id="terminal-title">A receipt you can keep. Nothing you need to hide.</h2>
+          <p>JSON output and JSONL receipts fit CI without sending your request history anywhere.</p>
+        </div>
+        <div class="terminal">
+          <pre role="region" aria-label="Example terminal output" tabindex="0"><code><span class="prompt">$</span> apg check --profile production --method DELETE \
+    --url /v1/users/42 --ack-production production
+
+<span class="blocked">✕ BLOCKED</span>  production · 8C31F2A091E4
+  DELETE api.example.com/v1/users/42
+  <span class="reason">- operation_not_allowed</span>
+  receipt: .apg/receipts.jsonl
+
+<span class="quiet">No child process started. No network connection opened.</span></code></pre>
+        </div>
+      </section>
+
+      <section class="final-cta" aria-labelledby="cta-title">
+        <p class="eyebrow">One binary / zero accounts</p>
+        <h2 id="cta-title">Put a gate in front of production.</h2>
+        <p>Open source, MIT licensed, and designed to wrap the clients you already use.</p>
+        <a class="button primary inverse" href="https://github.com/B-Divyesh/sf-api-profile-guard">Get API Profile Guard <span aria-hidden="true">↗</span></a>
+      </section>
+    </main>
+
+    <footer>
+      <p><b>API Profile Guard</b> · Built by the Param Factory.</p>
+      <nav aria-label="Legal navigation"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-api-profile-guard/blob/main/LICENSE">MIT license</a></nav>
+    </footer>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>

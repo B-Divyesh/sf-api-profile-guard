@@ -1,0 +1,10 @@
+{
+  "name": "API Profile Guard",
+  "short_name": "APG",
+  "description": "Local policy preflight for safer API requests.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4efd9",
+  "theme_color": "#f4efd9",
+  "icons": []
+}

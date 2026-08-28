@@ -79,11 +79,12 @@ or auto-plays.
 
 ## Original asset plan and provenance
 
-- `site/public/preflight-gate.webp`: original raster hero showing three request
+- `site/public/preflight-gate.webp` plus a 720px responsive derivative: original raster hero showing three request
   streams entering a mechanical inspection gate, rendered as a two-ink halftone
   editorial print with generous negative space and no text. Generated specifically
   for this product with the factory `factory-image` deployment, then resized and
-  converted locally to WebP. Intended display size: 720 × 520; budget: ≤300 KB.
+  converted locally to WebP. The 1200px source is 145 KB and its 720px derivative
+  is used on small screens; both stay below the 300 KB budget.
 - UI marks, check symbols, arrows, dotted fields, and registration cross are drawn
   in CSS/inline SVG by this project and contain no third-party artwork.
 

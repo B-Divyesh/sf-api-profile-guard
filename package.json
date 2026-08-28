@@ -1,0 +1,20 @@
+{
+  "name": "api-profile-guard-site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --config vite.config.js",
+    "build": "npm run build:site",
+    "build:site": "vite build --config vite.config.js",
+    "test": "cargo test --all-targets && npm run test:site",
+    "test:site": "node --test site/*.test.js",
+    "test:e2e": "playwright test",
+    "lint": "cargo fmt --check && cargo clippy --all-targets -- -D warnings"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.10.2",
+    "playwright": "1.58.2",
+    "vite": "7.3.6"
+  }
+}

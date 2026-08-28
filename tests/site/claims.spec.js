@@ -229,6 +229,12 @@ test('@claim:browser-demo-isolation', async ({ page, context }, testInfo) => {
   expect(await page.evaluate(() => Object.keys(sessionStorage).filter((key) => key.startsWith('demo:')))).toEqual([])
   expect(await page.evaluate(() => localStorage.getItem('real:keep'))).toBe('local-value')
   expect(await page.evaluate(() => sessionStorage.getItem('real:keep'))).toBe('session-value')
+
+  await page.goto('/?demo=1')
+  await page.goto('/privacy/')
+  expect(await page.evaluate(() => Object.keys(sessionStorage).filter((key) => key.startsWith('demo:')))).toEqual([])
+  expect(await page.evaluate(() => localStorage.getItem('real:keep'))).toBe('local-value')
+  expect(await page.evaluate(() => sessionStorage.getItem('real:keep'))).toBe('session-value')
 })
 
 test('@claim:browser-input-local', async ({ page }, testInfo) => {

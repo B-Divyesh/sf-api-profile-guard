@@ -3,6 +3,7 @@ import './style.css'
 const routeFocusKey = 'apg:route-focus'
 const heading = document.querySelector('h1')
 const status = document.querySelector('#route-status')
+sessionStorage.removeItem('demo:api-profile-guard:sample-v1')
 
 if (sessionStorage.getItem(routeFocusKey) === '1') {
   sessionStorage.removeItem(routeFocusKey)

@@ -137,6 +137,7 @@ if (demoMode) {
 
 const routeFocusKey = 'apg:route-focus'
 if (!demoMode) {
+  sessionStorage.removeItem(demoKey)
   if (sessionStorage.getItem(routeFocusKey) === '1') {
     sessionStorage.removeItem(routeFocusKey)
     requestAnimationFrame(() => {

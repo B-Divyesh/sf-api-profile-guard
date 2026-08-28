@@ -1,0 +1,22 @@
+version = 1
+receipt_log = ".apg/receipts.jsonl"
+
+[profiles.development]
+env_file = ".env.dev"
+base_url_var = "API_BASE_URL"
+required = ["API_BASE_URL", "API_TOKEN"]
+credential_class = "test"
+allowed_hosts = ["localhost", "127.0.0.1"]
+
+[profiles.production]
+env_file = ".env.prod"
+base_url_var = "API_BASE_URL"
+required = ["API_BASE_URL", "API_TOKEN"]
+credential_class = "live"
+production = true
+acknowledgement = "production"
+allowed_hosts = ["api.example.com"]
+allow = ["GET /v1/*", "POST /v1/orders"]
+deny = ["* /v1/admin/*"]
+max_body_bytes = 65536
+forbidden_json_fields = ["debug", "skip_confirmation"]

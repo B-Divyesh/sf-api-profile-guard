@@ -4,7 +4,8 @@
 
 Repaired every blocking and minor finding in `.factory/review-1.md` while keeping
 the Rust CLI and static-site deployment model. The approved pressroom visual system
-remains intact. Implementation commit: `04264bcae377e43c2700acf52f73df1efccf9064`.
+remains intact. Implementation commits: `04264bcae377e43c2700acf52f73df1efccf9064`
+and demo-exit cleanup `a4f8d5a04bfb47d4a1dd00fce86f3bda83406c73`.
 
 ## What changed
 
@@ -35,7 +36,7 @@ remains intact. Implementation commit: `04264bcae377e43c2700acf52f73df1efccf9064
 ## Clean-clone evidence
 
 Verification used fresh clone `/tmp/apg-polish-clean.OWac5D/repo`, detached at
-`04264bcae377e43c2700acf52f73df1efccf9064`, after `npm ci` installed 20 packages
+`a4f8d5a04bfb47d4a1dd00fce86f3bda83406c73`, after `npm ci` installed 20 packages
 with 0 vulnerabilities.
 
 - Every one of the 15 `.factory/claims.json` commands: PASS independently. Each
@@ -63,7 +64,7 @@ with 0 vulnerabilities.
   buttons, and zero console/page errors; measured load was 536 ms.
 - Lighthouse 12.8.2 mobile: performance 100, accessibility 100, best practices
   100, SEO 100; FCP 1.0 s, LCP 1.6 s, TBT 0 ms, CLS 0, total transfer 61 KiB.
-- Production payload: initial app JavaScript 6,407 bytes, all JavaScript 7,864
+- Production payload: initial app JavaScript 6,444 bytes, all JavaScript 7,964
   bytes, CSS 13,141 bytes, mobile hero 49,178 bytes, large hero 148,256 bytes,
   and no font downloads.
 - Full-page 390×844 home and demo images plus the 1440×900 first screen were
@@ -91,6 +92,24 @@ done < <(jq -r '.[] | [.id, .test] | @tsv' .factory/claims.json)
 
 Static deployment uses the work-order command `npm ci && npm run build:site` and
 uploads `dist/site/`.
+
+## Deployment evidence
+
+- Deployed `dist/site/` through `/opt/fleet/lib/deploy-static.sh` using work-order
+  slug `api-profile-guard`. Final Azure deployment ID:
+  `57640a2a-622e-41c3-8477-c1d2d1478f53`.
+- Live URL: `https://api-profile-guard.sociobot.in`.
+- Live factory verification: PASS — HTTPS 200, 704 ms measured load, correct title,
+  `lang=en`, one H1, main landmark, no missing alt text, no unlabeled buttons, and
+  zero console/page errors.
+- Live browser suite: PASS at desktop and 390×844 — all tested requests stayed
+  same-origin, cookies and non-demo local storage stayed empty, 44 px footer targets
+  passed, and the `apg-field-guide-v4` shell reloaded offline.
+- Live routing: `/`, `/demo`, `/demo/`, `/?demo=1`, `/privacy/`, and `/terms/`
+  returned 200. `/does-not-exist` returned the authored 404 with status 404.
+- Live policy: CSP, Permissions-Policy, Referrer-Policy, and `nosniff` are present;
+  hashed assets return one-year immutable caching and `sw.js` returns `no-cache`.
+- The live HTML references final app asset `home-hMZqc3ne.js`.
 
 ## Known gaps and next steps
 

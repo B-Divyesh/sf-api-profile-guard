@@ -19,7 +19,7 @@
       }
     },
     {
-      "route": "/manifest.webmanifest",
+      "route": "/manifest.json",
       "headers": {
         "content-type": "application/manifest+json"
       }

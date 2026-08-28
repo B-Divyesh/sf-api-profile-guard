@@ -7,7 +7,7 @@
 /sw.js
   Cache-Control: no-cache
 
-/manifest.webmanifest
+/manifest.json
   Content-Type: application/manifest+json
 
 /*

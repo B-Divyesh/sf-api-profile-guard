@@ -1,5 +1,5 @@
-const CACHE = 'apg-field-guide-v2'
-const SHELL = ['/', '/privacy/', '/terms/', '/preflight-gate-720.webp', '/preflight-gate.webp', '/favicon.svg', '/manifest.webmanifest']
+const CACHE = 'apg-field-guide-v3'
+const SHELL = ['/', '/privacy/', '/terms/', '/preflight-gate-720.webp', '/preflight-gate.webp', '/favicon.svg', '/manifest.json']
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

@@ -57,7 +57,7 @@
           <h1 id="hero-title" tabindex="-1">Block API requests to the wrong environment</h1>
           <p class="lede">For developers switching dev, staging, and production before they run a request.</p>
           <div class="hero-actions">
-            <a class="button primary" href="/?demo=1#simulator">Try it with sample data</a>
+            <a class="button primary" href="/?demo=1#cli-demo">Try it with sample data</a>
             <p>See a blocked production request now.</p>
           </div>
           <ul class="proof-line" aria-label="Product facts">
@@ -163,10 +163,10 @@ deny = [<span class="string">"* /v1/admin/*"</span>]</code></pre>
         </div>
       </section>
 
-      <section class="terminal-section section-grid" aria-labelledby="terminal-title">
+      <section id="cli-demo" class="terminal-section section-grid" aria-labelledby="terminal-title">
         <div class="section-heading">
           <p class="section-number">CLI demo / 04</p>
-          <h2 id="terminal-title">Run the bundled CLI sample</h2>
+          <h2 id="terminal-title" tabindex="-1">Run the bundled CLI sample</h2>
           <p><code>apg demo</code> creates a temporary workspace. It shows one blocked request and one allowed request.</p>
         </div>
         <div class="terminal">

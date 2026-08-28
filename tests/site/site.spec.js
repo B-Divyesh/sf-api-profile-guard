@@ -58,6 +58,15 @@ test('internal page navigation moves focus to the new heading', async ({ page })
   await expect(page.getByRole('heading', { level: 1 })).toBeFocused()
 })
 
+test('first-screen sample action opens the recorded CLI demo in one click', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('link', { name: 'Try it with sample data' }).click()
+  await expect(page).toHaveURL(/\?demo=1#cli-demo$/)
+  await expect(page.getByText('Demo — sample data, nothing is saved')).toBeVisible()
+  await expect(page.getByRole('heading', { level: 2, name: 'Run the bundled CLI sample' })).toBeFocused()
+  await expect(page.getByLabel('Terminal recording of the bundled CLI demo')).toContainText('wrong production host')
+})
+
 test('simulator exposes allowed, blocked, and input-error states by keyboard', async ({ page }) => {
   await page.goto('/#simulator')
   const profile = page.getByLabel('Environment', { exact: true })

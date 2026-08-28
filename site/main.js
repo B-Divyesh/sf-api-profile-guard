@@ -130,8 +130,10 @@ if (demoMode) {
     sessionStorage.removeItem(demoKey)
   })
   requestAnimationFrame(() => {
-    $('#simulator').scrollIntoView()
-    $('#simulator-title').focus({ preventScroll: true })
+    const demoTarget = location.hash === '#cli-demo' ? $('#cli-demo') : $('#simulator')
+    const demoHeading = demoTarget.querySelector('h2')
+    demoTarget.scrollIntoView()
+    demoHeading.focus({ preventScroll: true })
   })
 }
 

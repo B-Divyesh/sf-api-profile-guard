@@ -10,7 +10,16 @@ homepage = "https://api-profile-guard.sociobot.in"
 readme = "README.md"
 keywords = ["api", "cli", "dotenv", "safety", "devtools"]
 categories = ["command-line-utilities", "development-tools"]
-exclude = ["site/", "dist/", ".factory/"]
+exclude = [
+  "site/",
+  "dist/",
+  ".factory/",
+  "package.json",
+  "package-lock.json",
+  "playwright.config.js",
+  "vite.config.js",
+  "tests/site/"
+]
 
 [[bin]]
 name = "apg"
@@ -28,4 +37,3 @@ url = "2.5.7"
 [profile.release]
 lto = "thin"
 strip = true
-

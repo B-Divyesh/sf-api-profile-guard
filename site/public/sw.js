@@ -2,7 +2,18 @@ const CACHE = 'apg-field-guide-v1'
 const SHELL = ['/', '/privacy/', '/terms/', '/preflight-gate-720.webp', '/preflight-gate.webp', '/favicon.svg', '/manifest.webmanifest']
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)))
+  event.waitUntil(
+    caches.open(CACHE).then(async (cache) => {
+      await cache.addAll(SHELL)
+      const page = await fetch('/')
+      const html = await page.text()
+      const discovered = [...html.matchAll(/(?:src|href)="([^"]+)"/g)]
+        .map((match) => new URL(match[1], self.location.origin))
+        .filter((url) => url.origin === self.location.origin)
+        .map((url) => `${url.pathname}${url.search}`)
+      await cache.addAll([...new Set(discovered)])
+    })
+  )
   self.skipWaiting()
 })
 

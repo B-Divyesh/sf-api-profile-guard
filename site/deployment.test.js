@@ -27,7 +27,7 @@ test('Azure deployment config enforces caching, hardening, MIME, and a true 404'
 })
 
 test('service-worker cache version advances with the repaired shell', async () => {
-  assert.match(await read('./public/sw.js'), /const CACHE = 'apg-field-guide-v5'/)
+  assert.match(await read('./public/sw.js'), /const CACHE = 'apg-field-guide-v6'/)
 })
 
 test('every claim has one tagged test and one runnable command', async () => {
@@ -52,6 +52,22 @@ test('all authored routes carry complete sharing metadata and common chrome', as
     assert.match(html, /rel="apple-touch-icon"/)
     assert.match(html, /aria-label="Primary navigation"/)
     assert.match(html, /<footer>/)
-    assert.match(html, /Built by Param Factory · v0\.1\.0\+repair\.1/)
+    assert.match(html, /Built by Param Factory · v0\.1\.0\+repair\.2/)
   }
+})
+
+test('production confirmation phrase is the only public term', async () => {
+  const [html, readme, cli] = await Promise.all([
+    read('./index.html'),
+    read('../README.md'),
+    read('../src/main.rs')
+  ])
+  const publicCopy = `${html}\n${readme}\n${cli}`
+  assert.doesNotMatch(publicCopy, /production (?:phrase|acknowledgement)/i)
+  assert.match(publicCopy, /production confirmation phrase/)
+})
+
+test('Node engine matches the pinned Vite runtime requirement', async () => {
+  const packageJson = JSON.parse(await read('../package.json'))
+  assert.equal(packageJson.engines.node, '>=20.19.0 <21 || >=22.12.0')
 })

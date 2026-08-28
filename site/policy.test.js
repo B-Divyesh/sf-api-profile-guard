@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { globMatch, inspectRequest } from './policy.js'
 
-test('production requires an exact acknowledgement', () => {
+test('production requires the exact confirmation phrase', () => {
   const result = inspectRequest({
     profileName: 'production',
     method: 'GET',
@@ -10,7 +10,7 @@ test('production requires an exact acknowledgement', () => {
     acknowledgement: ''
   })
   assert.equal(result.state, 'blocked')
-  assert.match(result.reasons.join(' '), /acknowledge/)
+  assert.match(result.reasons.join(' '), /production confirmation phrase/)
 })
 
 test('production blocks forbidden hosts and non-allowlisted operations', () => {

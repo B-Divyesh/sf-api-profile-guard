@@ -1,5 +1,6 @@
 import './style.css'
 import { inspectRequest } from './policy.js'
+import demoTranscript from './demo-transcript.txt?raw'
 
 const $ = (selector) => document.querySelector(selector)
 const demoMode = new URLSearchParams(location.search).get('demo') === '1' || /^\/demo\/?$/.test(location.pathname)
@@ -18,6 +19,21 @@ const resultTitle = $('#result-title')
 const resultDetails = $('#result-details')
 const resultReasons = $('#result-reasons')
 const submit = $('#inspect-button')
+
+function renderDemoTranscript() {
+  const container = $('#cli-demo-transcript')
+  const fragments = demoTranscript.trimEnd().split(/(\$|✕ BLOCKED|✓ ALLOWED)/)
+  for (const fragment of fragments) {
+    const span = document.createElement('span')
+    if (fragment === '$') span.className = 'prompt'
+    if (fragment === '✕ BLOCKED') span.className = 'blocked'
+    if (fragment === '✓ ALLOWED') span.className = 'allowed'
+    span.textContent = fragment
+    container.append(span)
+  }
+}
+
+renderDemoTranscript()
 
 function syncProductionField() {
   const production = profile.value === 'production'
@@ -159,6 +175,9 @@ if (demoMode) {
     const demoTarget = location.hash === '#cli-demo' ? $('#cli-demo') : $('#simulator')
     const demoHeading = demoTarget.querySelector('h2')
     demoTarget.scrollIntoView({ behavior: 'instant' })
+    if (demoTarget.id === 'cli-demo' && innerWidth <= 480) {
+      window.scrollBy({ top: 72, behavior: 'instant' })
+    }
     demoHeading.focus({ preventScroll: true })
   }
   if (document.readyState === 'complete') openDemoTarget()

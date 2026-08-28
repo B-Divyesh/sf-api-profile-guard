@@ -1,10 +1,10 @@
 [
   {
     "id": "cli-demo-sandbox",
-    "claim": "apg demo creates a temporary workspace, blocks one sample, allows one sample, and leaves the caller directory unchanged",
+    "claim": "apg demo creates a temporary workspace, blocks one sample, allows one sample, leaves the caller directory unchanged, and matches the published transcript",
     "where": "landing CLI demo, README",
     "test": "npm run test:claim -- --grep '@claim:cli-demo-sandbox'",
-    "sandbox": "fresh caller directory; bundled sample; assert two receipts exist only in the printed OS temp directory"
+    "sandbox": "fresh caller directory; bundled sample; assert two receipts exist only in the printed OS temp directory; normalize run-specific paths and fingerprints and compare every published transcript line"
   },
   {
     "id": "blocked-host-no-client",

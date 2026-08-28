@@ -26,7 +26,11 @@
 - It prints the workspace, policy, environment, request body, and receipt paths.
 - It never changes the process working directory and writes nothing into the caller
   directory. The temporary workspace remains available for inspection.
+- The landing terminal reads `site/demo-transcript.txt`. Regenerate that asset with
+  `npm run demo:record`; the script runs the current binary and shortens only the
+  temporary workspace path.
 
 Run `npm run test:claim -- --grep '@claim:cli-demo-sandbox'` and
 `npm run test:claim -- --grep '@claim:browser-demo-isolation'` to verify both
-boundaries from clean sandboxes.
+boundaries from clean sandboxes. The CLI claim compares every published transcript
+line with a fresh run and separately requires two distinct fingerprints.

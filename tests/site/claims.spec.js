@@ -15,6 +15,19 @@ function workspace(label) {
   return mkdtempSync(`${tmpdir()}/apg-claim-${label}-`)
 }
 
+function normalizeDemoTranscript(text) {
+  const fingerprintMap = new Map()
+  return text
+    .replaceAll(/\/tmp\/apg-demo-[^\s/]+/g, '<WORKSPACE>')
+    .replaceAll(/[A-F0-9]{12}/g, (fingerprint) => {
+      if (!fingerprintMap.has(fingerprint)) {
+        fingerprintMap.set(fingerprint, `<FINGERPRINT_${fingerprintMap.size + 1}>`)
+      }
+      return fingerprintMap.get(fingerprint)
+    })
+    .trimEnd()
+}
+
 function writePolicy(root, { baseUrl = 'https://api.example.com', token = 'claim-secret-value', allowedHost = 'api.example.com' } = {}) {
   writeFileSync(
     `${root}/apg.toml`,
@@ -54,6 +67,20 @@ test('@claim:cli-demo-sandbox', async ({}, testInfo) => {
   expect(result.stdout).toContain('environment: ')
   expect(result.stdout).toContain('request body: ')
   expect(result.stdout).toContain('receipts: ')
+  expect(result.stdout).toContain('POST wrong.example/v1/orders')
+  expect(result.stdout).toContain('POST api.example.com/v1/orders')
+  expect(result.stdout.match(/credential class: live-sample/g)).toHaveLength(2)
+  expect(result.stdout).toContain("host_not_allowed: Host wrong.example is not in this profile's allowed_hosts.")
+  const liveFingerprints = [...result.stdout.matchAll(/production · ([A-F0-9]{12})/g)].map((match) => match[1])
+  expect(liveFingerprints).toHaveLength(2)
+  expect(new Set(liveFingerprints).size).toBe(2)
+  const published = readFileSync('site/demo-transcript.txt', 'utf8')
+  const publishedFingerprints = [...published.matchAll(/production · ([A-F0-9]{12})/g)].map((match) => match[1])
+  expect(publishedFingerprints).toHaveLength(2)
+  expect(new Set(publishedFingerprints).size).toBe(2)
+  expect(normalizeDemoTranscript(published)).toBe(
+    normalizeDemoTranscript(`$ apg demo\n${result.stdout}`)
+  )
   const demoPath = result.stdout.match(/^  workspace: (.+)$/m)?.[1]
   expect(demoPath).toBeTruthy()
   expect(demoPath.startsWith(tmpdir())).toBe(true)

@@ -74,7 +74,7 @@ try {
       await new Promise((resolve) => navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true }))
     }
   })
-  assert.deepEqual(await page.evaluate(() => caches.keys()), ['apg-field-guide-v5'])
+  assert.deepEqual(await page.evaluate(() => caches.keys()), ['apg-field-guide-v6'])
   await context.setOffline(true)
   await page.reload({ waitUntil: 'domcontentloaded' })
   assert.equal(await page.locator('h1').textContent(), 'Block API requests to the wrong environment')

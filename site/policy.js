@@ -70,7 +70,7 @@ export function inspectRequest({ profileName, method, requestUrl, acknowledgemen
     reasons.push(`${normalizedMethod} ${resolved.pathname} is not on the production allowlist.`)
   }
   if (profile.production && acknowledgement !== profile.acknowledgement) {
-    reasons.push('Type “production” to acknowledge the resolved production profile.')
+    reasons.push('Enter the configured production confirmation phrase.')
   }
 
   return {

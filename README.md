@@ -139,8 +139,6 @@ npm run test:claim -- --grep '@claim:offline-demo-reload'
 
 ## Develop and verify
 
-Requirements are Rust 1.85 or newer and Node.js 20 or newer.
-
 ```sh
 npm ci
 npm test

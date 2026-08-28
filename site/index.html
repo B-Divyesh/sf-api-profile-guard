@@ -81,7 +81,7 @@
           <h2 id="steps-title">Check a request in three steps</h2>
           <ol>
             <li><span>01</span><strong>Read</strong><small>Open the named environment file as text.</small></li>
-            <li><span>02</span><strong>Check</strong><small>Match the host, operation, body, and production phrase.</small></li>
+            <li><span>02</span><strong>Check</strong><small>Match the host, operation, body, and production confirmation phrase.</small></li>
             <li><span>03</span><strong>Run</strong><small>Start the API client only when every check passes.</small></li>
           </ol>
         </div>
@@ -170,18 +170,8 @@ deny = [<span class="string">"* /v1/admin/*"</span>]</code></pre>
           <p><code>apg demo</code> creates a temporary workspace. It shows one blocked request and one allowed request.</p>
         </div>
         <div class="terminal">
-          <div class="specimen-bar"><span>Recorded from apg demo</span><span>sample only</span></div>
-          <pre role="region" aria-label="Terminal recording of the bundled CLI demo" tabindex="0"><code><span class="prompt">$</span> apg demo
-API Profile Guard sample
-  workspace: /tmp/apg-demo-…
-
-Sample 1 of 2 — wrong production host
-<span class="blocked">✕ BLOCKED</span>  production · 8C31F2A091E4
-  - host_not_allowed
-
-Sample 2 of 2 — approved production request
-<span class="allowed">✓ ALLOWED</span>  production · 8C31F2A091E4
-  receipts: /tmp/apg-demo-…/receipts.jsonl</code></pre>
+          <div class="specimen-bar"><span>Captured from apg demo</span><span>temporary paths shortened</span></div>
+          <pre role="region" aria-label="Terminal recording of the bundled CLI demo" tabindex="0"><code id="cli-demo-transcript"></code></pre>
         </div>
       </section>
 
@@ -196,7 +186,7 @@ Sample 2 of 2 — approved production request
     <footer>
       <p><b>API Profile Guard</b> · Block wrong-environment API requests.</p>
       <nav aria-label="Footer navigation"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-api-profile-guard">Source</a></nav>
-      <p>Built by Param Factory · v0.1.0+repair.1</p>
+      <p>Built by Param Factory · v0.1.0+repair.2</p>
     </footer>
     <script type="module" src="/main.js"></script>
   </body>

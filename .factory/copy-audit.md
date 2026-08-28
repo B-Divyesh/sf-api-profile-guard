@@ -1,7 +1,7 @@
 # Plain-words copy audit
 
 Audited August 28, 2026. Counts treat hyphenated terms, commands, and version
-strings as one word. Code blocks, form option values, and metadata are excluded.
+strings as one word. Config blocks, form option values, paths, and metadata are excluded.
 No sentence exceeds 22 words. No sentence uses a banned marketing word.
 
 ## Landing page
@@ -10,17 +10,17 @@ No sentence exceeds 22 words. No sentence uses a banned marketing word.
 | ---: | --- | --- |
 | 3 | Local request guard | None |
 | 7 | Block API requests to the wrong environment | None |
-| 11 | For developers switching dev, staging, and production before they run a request. | None |
-| 6 | Try it with sample data | None |
+| 12 | For developers switching dev, staging, and production before they run a request. | None |
+| 5 | Try it with sample data | None |
 | 6 | See a blocked production request now. | None |
 | 4 | Runs on your machine | None |
 | 2 | No account | None |
 | 3 | Free, MIT licensed | None |
 | 3 | Copy install command | None |
-| 11 | The guard checks local policy before your API client starts. | None |
+| 10 | The guard checks local policy before your API client starts. | None |
 | 6 | Check a request in three steps | None |
 | 7 | Open the named environment file as text. | None |
-| 9 | Match the host, operation, body, and production phrase. | None |
+| 9 | Match the host, operation, body, and production confirmation phrase. | None |
 | 9 | Start the API client only when every check passes. | None |
 | 6 | Check a request in your browser | None |
 | 9 | Change the sample request and check its policy result. | None |
@@ -28,18 +28,26 @@ No sentence exceeds 22 words. No sentence uses a banned marketing word.
 | 8 | Use an absolute URL to check its host. | None |
 | 3 | Type “production” exactly. | None |
 | 4 | No request checked yet | None |
-| 8 | Choose an environment and operation. Then check the request. | None |
-| 7 | Require a confirmation for production requests | None |
-| 13 | Production requests need an exact host, an allowed operation, and the configured production confirmation phrase. | None |
-| 6 | Read environment files as text | None |
+| 5 | Choose an environment and operation. | None |
+| 4 | Then check the request. | None |
+| 6 | Require a confirmation for production requests | None |
+| 15 | Production requests need an exact host, an allowed operation, and the configured production confirmation phrase. | None |
+| 5 | Read environment files as text | None |
 | 7 | APG rejects shell expansion and command substitution. | None |
 | 5 | Save receipts without request values | None |
-| 9 | Receipts exclude environment values, headers, query strings, and request bodies. | None |
-| 6 | Block before the client starts | None |
+| 10 | Receipts exclude environment values, headers, query strings, and request bodies. | None |
+| 5 | Block before the client starts | None |
 | 11 | A blocked run does not start curl, Bruno, or your script. | None |
-| 6 | Run the bundled CLI sample | None |
+| 5 | Run the bundled CLI sample | None |
 | 6 | `apg demo` creates a temporary workspace. | None |
 | 9 | It shows one blocked request and one allowed request. | None |
+| 4 | Captured from `apg demo` | None |
+| 3 | Temporary paths shortened | None |
+| 4 | API Profile Guard sample | None |
+| 7 | Sample 1 of 2 — wrong production host | None |
+| 8 | Host wrong.example is not in this profile's allowed_hosts. | None |
+| 7 | Sample 2 of 2 — approved production request | None |
+| 8 | Demo complete. Your current directory was not changed. | None |
 | 5 | Install the production request guard | None |
 | 9 | Build the MIT-licensed Rust binary from the public source. | None |
 | 3 | Install from source | None |
@@ -47,6 +55,18 @@ No sentence exceeds 22 words. No sentence uses a banned marketing word.
 | 6 | Demo — sample data, nothing is saved | None |
 | 2 | Reset demo | None |
 | 3 | Start for real | None |
+| 3 | Install command copied | None |
+| 4 | Select the install command | None |
+| 2 | Policy passed. | None |
+| 5 | The client may start. | None |
+| 6 | The request could not be checked. | None |
+| 5 | Blocked before the client starts. | None |
+| 3 | Correct the input. | None |
+| 5 | Then check the request again. | None |
+| 5 | Reading the environment and policy… | None |
+| 9 | The browser sample does not open a network connection. | None |
+| 6 | Enter the configured production confirmation phrase. | None |
+| 8 | Offline — this guide and its sample still work. | None |
 
 ## README
 
@@ -99,7 +119,6 @@ No sentence exceeds 22 words. No sentence uses a banned marketing word.
 | 5 | Run any listed command directly. | None |
 | 2 | For example. | None |
 | 3 | Develop and verify | None |
-| 11 | Requirements are Rust 1.85 or newer and Node.js 20 or newer. | None |
 | 9 | `npm run build` creates the static site in `dist/site/`. | None |
 | 9 | The browser sample reloads offline after its first visit. | None |
 | 5 | It works without an account. | None |

@@ -14,7 +14,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
     name = "apg",
     version,
     about = "Block API requests that do not match the resolved environment policy",
-    long_about = "API Profile Guard resolves a literal dotenv profile, checks required variables, host, method/path, body, and production acknowledgement, writes a value-free receipt, and only then starts your client. It never performs a network request itself.",
+    long_about = "APG reads an environment file as text. It checks required values, host, method, path, body, and the production confirmation phrase. It writes a value-free receipt before starting your client. APG never makes a network request.",
     after_help = "QUICK START:\n  apg check --profile staging --method GET --url /v1/health\n  apg run --profile production --method POST --url /v1/orders --body-file body.json --ack-production production -- curl -X POST --data-binary @body.json '{url}'\n\nExit 10 means blocked before command execution. See https://api-profile-guard.sociobot.in for the config reference."
 )]
 struct Cli {
@@ -60,7 +60,7 @@ struct RequestArgs {
     #[arg(long, value_name = "FILE")]
     body_file: Option<PathBuf>,
 
-    /// Exact production phrase configured by the selected profile.
+    /// Exact production confirmation phrase configured by the selected profile.
     #[arg(long, value_name = "PHRASE")]
     ack_production: Option<String>,
 }

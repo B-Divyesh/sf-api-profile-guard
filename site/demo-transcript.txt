@@ -1,0 +1,22 @@
+$ apg demo
+API Profile Guard sample
+  workspace: /tmp/apg-demo-…
+  policy: /tmp/apg-demo-…/apg.toml
+  environment: /tmp/apg-demo-…/production.env
+  request body: /tmp/apg-demo-…/order.json
+
+Sample 1 of 2 — wrong production host
+✕ BLOCKED  production · 71714F57C64A
+  POST wrong.example/v1/orders
+  credential class: live-sample
+  - host_not_allowed: Host wrong.example is not in this profile's allowed_hosts.
+  receipt: /tmp/apg-demo-…/receipts.jsonl
+
+Sample 2 of 2 — approved production request
+✓ ALLOWED  production · 2AB89550FD17
+  POST api.example.com/v1/orders
+  credential class: live-sample
+  receipt: /tmp/apg-demo-…/receipts.jsonl
+
+  receipts: /tmp/apg-demo-…/receipts.jsonl
+Demo complete. Your current directory was not changed.

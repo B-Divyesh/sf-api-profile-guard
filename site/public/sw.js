@@ -1,4 +1,4 @@
-const CACHE = 'apg-field-guide-v5'
+const CACHE = 'apg-field-guide-v6'
 const SHELL = ['/', '/?demo=1', '/demo/', '/privacy/', '/terms/', '/404.html', '/preflight-gate-720.webp', '/preflight-gate.webp', '/social-card.webp', '/favicon.svg', '/apple-touch-icon.png', '/manifest.json']
 
 self.addEventListener('install', (event) => {

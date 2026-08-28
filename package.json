@@ -3,10 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=20.19.0 <21 || >=22.12.0"
+  },
   "scripts": {
     "dev": "vite --config vite.config.js",
     "build": "npm run build:site",
     "build:site": "vite build --config vite.config.js",
+    "demo:record": "cargo build --quiet && node scripts/record-demo.mjs",
     "test": "cargo test --all-targets && npm run test:site",
     "test:site": "node --test site/*.test.js",
     "test:claim": "cargo build --quiet && playwright test tests/site/claims.spec.js",

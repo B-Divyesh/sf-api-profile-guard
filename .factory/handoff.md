@@ -1,6 +1,46 @@
 # API Profile Guard v0.1.0 — handoff
 
-## What shipped
+## Independent verification status — FAIL
+
+Candidate `f67fc1baf8da7d2f1d117f19407cff9fe1c026fe` was independently tested on
+2026-08-28 against `https://api-profile-guard.sociobot.in`. The live site matches
+the candidate byte-for-byte across 13 representative build files, so this is not a
+stale-deployment result.
+
+Release is **FAIL**. Exact evidence and complete reproduction details are in
+`.factory/verification.md`.
+
+Blocking defects:
+
+1. **High:** the live primary command `cargo install api-profile-guard` fails because
+   crates.io has no such published crate and the repository has no release. The
+   README's source install works, but the deployed primary journey does not.
+2. **Medium:** allowed `apg --json run` output is not one JSON object when its child
+   writes stdout; JSON parsing fails on the child output appended after the decision.
+3. **Medium:** production ignores `_headers`; hashed assets and `sw.js` all receive
+   `public, must-revalidate, max-age=30` instead of immutable assets and no-cache SW.
+
+Additional low-severity findings: unknown routes return the home page with HTTP 200,
+CSP and Permissions-Policy are absent, the manifest uses a generic binary MIME type,
+and one footer link measures 42x44 CSS px instead of 44x44.
+
+Passing evidence: clean `npm ci`; 14/14 unit/integration/site tests; lint; exact Vite
+build; 6 Playwright passes with 2 intentional skips; release build; `cargo package`;
+isolated package install; seeded pre-network blocking; secret-free concurrent
+receipts; desktop/mobile keyboard and visual checks; zero axe findings; no console
+errors or third-party requests; service-worker update/offline reload; and live
+Lighthouse 100/100/100/100 with 1.16 s LCP, 0 ms TBT, and 0 CLS.
+
+No product code was changed during verification. Only this handoff and the
+verification report were added/updated.
+
+## Original builder handoff (retained for context)
+
+The material below predates independent verification. Where it claims stable JSON,
+deployed cache headers, or release readiness, the FAIL verdict and evidence above
+supersede it.
+
+### What shipped
 
 - A publish-ready Rust package producing one `apg` binary with `check` and `run`
   commands, clear help, stable `--json` output, documented exit codes, and no

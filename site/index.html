@@ -39,7 +39,7 @@
           <h1 id="hero-title">Know where the request is going.</h1>
           <p class="lede">Resolve the profile. Inspect the policy. Release the request—only when host, operation, body, and credential class agree.</p>
           <div class="install-strip" aria-label="Install command">
-            <code id="install-command">cargo install api-profile-guard</code>
+            <code id="install-command" tabindex="0" aria-label="Git install command; scroll horizontally to read the complete command">cargo install --git https://github.com/B-Divyesh/sf-api-profile-guard.git --locked api-profile-guard</code>
             <button class="copy-button" type="button" data-copy="#install-command">Copy</button>
           </div>
           <div class="hero-actions">
@@ -142,7 +142,7 @@ deny = [<span class="string">"* /v1/admin/*"</span>]</code></pre>
         <div class="section-heading">
           <p class="section-number">Release record / 04</p>
           <h2 id="terminal-title">A receipt you can keep. Nothing you need to hide.</h2>
-          <p>JSON output and JSONL receipts fit CI without sending your request history anywhere.</p>
+          <p>JSON decisions and JSONL receipts fit CI without sending your request history anywhere. Allowed runs keep child stdout clean for response pipelines.</p>
         </div>
         <div class="terminal">
           <pre role="region" aria-label="Example terminal output" tabindex="0"><code><span class="prompt">$</span> apg check --profile production --method DELETE \

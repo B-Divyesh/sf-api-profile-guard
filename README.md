@@ -12,7 +12,14 @@ request made by the command you explicitly run.
 
 ## Install
 
-Build the single Rust binary from source:
+Install the single Rust binary directly from the public source repository:
+
+```sh
+cargo install --git https://github.com/B-Divyesh/sf-api-profile-guard.git --locked api-profile-guard
+apg --help
+```
+
+Or clone it and build from a reviewed checkout:
 
 ```sh
 git clone https://github.com/B-Divyesh/sf-api-profile-guard.git
@@ -21,8 +28,9 @@ cargo install --path .
 apg --help
 ```
 
-The factory publishes release binaries separately. The package starts at version
-`0.1.0` and is also ready for `cargo install api-profile-guard` once published.
+The factory publishes registry packages and release binaries separately. Version
+`0.1.0` is ready for `cargo install api-profile-guard` after registry publication;
+the Git install above works before that publication occurs.
 
 ## Usage
 
@@ -68,7 +76,8 @@ apg check \
   --ack-production production
 ```
 
-Use `--json` for stable, script-friendly output:
+Use `--json` for one stable, script-friendly decision object from `check` (and from
+a blocked `run`):
 
 ```sh
 apg --json check --profile development --method GET --url /v1/health
@@ -91,6 +100,8 @@ apg run \
 `run` is intentionally non-interactive, including in CI. It never starts the child
 when the preflight is blocked. If body rules apply, pass `--body-file` so the exact
 bytes can be inspected locally; bodies and headers are never copied into receipts.
+For an allowed `run`, child stdout is preserved byte-for-byte so response pipelines
+stay valid; the guard decision is written to stderr (as JSON when `--json` is set).
 
 ### Policy behavior
 

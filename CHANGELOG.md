@@ -5,6 +5,15 @@ Semantic Versioning.
 
 ## [Unreleased]
 
+### Fixed
+
+- Kept allowed child stdout clean by writing `run` preflight details to stderr.
+- Replaced the unpublished registry install prompt with a working Git install.
+- Added Azure-native immutable asset caching, service-worker revalidation, manifest
+  MIME, CSP, Permissions-Policy, and real 404 response configuration.
+- Increased every footer navigation target to at least 44 by 44 CSS pixels.
+- Advanced the offline shell cache version so deployed repairs reach existing users.
+
 ## [0.1.0] - 2026-08-28
 
 ### Added

@@ -4,6 +4,7 @@ use api_profile_guard::{
 };
 use clap::{Args, Parser, Subcommand};
 use std::fs;
+use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, ExitCode};
 
@@ -20,7 +21,7 @@ struct Cli {
     #[arg(long, global = true, default_value = "apg.toml", value_name = "FILE")]
     config: PathBuf,
 
-    /// Emit one JSON object for scripting. Diagnostics still use stderr.
+    /// Emit decision JSON. Allowed run decisions use stderr so child stdout stays clean.
     #[arg(long, global = true)]
     json: bool,
 
@@ -92,7 +93,7 @@ fn execute(cli: Cli) -> Result<i32, AppError> {
     match cli.command {
         Commands::Check(request) => {
             let (_, decision) = preflight(&cli.config, &request)?;
-            print_decision(&decision, cli.json)?;
+            print_decision(&decision, cli.json, &mut io::stdout())?;
             Ok(if decision.decision == DecisionKind::Allowed {
                 0
             } else {
@@ -101,10 +102,14 @@ fn execute(cli: Cli) -> Result<i32, AppError> {
         }
         Commands::Run(run) => {
             let (loaded, decision) = preflight(&cli.config, &run.request)?;
-            print_decision(&decision, cli.json)?;
             if decision.decision == DecisionKind::Blocked {
+                print_decision(&decision, cli.json, &mut io::stdout())?;
                 return Ok(BLOCKED_EXIT);
             }
+            // An allowed run is a transparent wrapper around the child. Keep stdout
+            // exclusively for the child so response bodies remain pipeable and send
+            // the guard's preflight record to the diagnostic stream instead.
+            print_decision(&decision, cli.json, &mut io::stderr())?;
             let resolved_url = decision
                 .resolved_url
                 .as_deref()
@@ -164,34 +169,50 @@ fn preflight(
     Ok((loaded, decision))
 }
 
-fn print_decision(decision: &Decision, json: bool) -> Result<(), AppError> {
+fn print_decision(
+    decision: &Decision,
+    json: bool,
+    output: &mut impl Write,
+) -> Result<(), AppError> {
     if json {
-        println!(
+        writeln!(
+            output,
             "{}",
             serde_json::to_string(decision)
                 .map_err(|e| AppError(format!("could not encode JSON output: {e}")))?
-        );
+        )
+        .map_err(|e| AppError(format!("could not write decision output: {e}")))?;
         return Ok(());
     }
     let mark = match decision.decision {
         DecisionKind::Allowed => "✓ ALLOWED",
         DecisionKind::Blocked => "✕ BLOCKED",
     };
-    println!("{mark}  {} · {}", decision.profile, decision.fingerprint);
-    println!(
+    writeln!(
+        output,
+        "{mark}  {} · {}",
+        decision.profile, decision.fingerprint
+    )
+    .map_err(|e| AppError(format!("could not write decision output: {e}")))?;
+    writeln!(
+        output,
         "  {} {}{}",
         decision.method,
         decision.host.as_deref().unwrap_or("unresolved"),
         decision.path
-    );
+    )
+    .map_err(|e| AppError(format!("could not write decision output: {e}")))?;
     if !decision.credential_class.is_empty() {
-        println!("  credential class: {}", decision.credential_class);
+        writeln!(output, "  credential class: {}", decision.credential_class)
+            .map_err(|e| AppError(format!("could not write decision output: {e}")))?;
     }
     for reason in &decision.reasons {
-        println!("  - {}: {}", reason.code, reason.message);
+        writeln!(output, "  - {}: {}", reason.code, reason.message)
+            .map_err(|e| AppError(format!("could not write decision output: {e}")))?;
     }
     if let Some(receipt) = &decision.receipt {
-        println!("  receipt: {receipt}");
+        writeln!(output, "  receipt: {receipt}")
+            .map_err(|e| AppError(format!("could not write decision output: {e}")))?;
     }
     Ok(())
 }

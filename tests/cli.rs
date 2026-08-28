@@ -172,3 +172,38 @@ fn allowed_request_passes_profile_env_and_replaces_url() {
     );
     fs::remove_dir_all(root).unwrap();
 }
+
+#[test]
+fn allowed_json_run_keeps_child_stdout_parseable_and_separate() {
+    let root = sandbox("json-run-streams");
+    write_fixture(&root, "https://api.example.com", true, "api.example.com");
+    let output = Command::new(binary())
+        .current_dir(&root)
+        .args([
+            "--json",
+            "run",
+            "--profile",
+            "production",
+            "--method",
+            "GET",
+            "--url",
+            "/v1/health",
+            "--ack-production",
+            "production",
+            "--",
+            "sh",
+            "-c",
+            "printf '%s' '{\"from_child\":true}'",
+        ])
+        .output()
+        .unwrap();
+
+    assert_eq!(output.status.code(), Some(0));
+    let child_value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(child_value["from_child"], true);
+
+    let decision: serde_json::Value = serde_json::from_slice(&output.stderr).unwrap();
+    assert_eq!(decision["decision"], "allowed");
+    assert_eq!(decision["profile"], "production");
+    fs::remove_dir_all(root).unwrap();
+}

@@ -150,6 +150,11 @@ footer nav a {
   font-weight: 700;
 }
 
+footer nav a {
+  justify-content: center;
+  min-width: 44px;
+}
+
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);

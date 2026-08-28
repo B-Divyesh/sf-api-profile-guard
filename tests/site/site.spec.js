@@ -14,6 +14,17 @@ test('home is accessible and has no console errors', async ({ page }) => {
   const scan = await new AxeBuilder({ page }).analyze()
   expect(scan.violations.filter(({ impact }) => ['serious', 'critical'].includes(impact))).toEqual([])
   expect(errors).toEqual([])
+  await expect(page.locator('#install-command')).toHaveText(
+    'cargo install --git https://github.com/B-Divyesh/sf-api-profile-guard.git --locked api-profile-guard'
+  )
+
+  const footerTargets = await page.locator('footer nav a').evaluateAll((links) =>
+    links.map((link) => ({ text: link.textContent.trim(), ...link.getBoundingClientRect().toJSON() }))
+  )
+  for (const target of footerTargets) {
+    expect(target.width, `${target.text} width`).toBeGreaterThanOrEqual(44)
+    expect(target.height, `${target.text} height`).toBeGreaterThanOrEqual(44)
+  }
 })
 
 test('simulator exposes allowed, blocked, and input-error states by keyboard', async ({ page }) => {
@@ -48,11 +59,20 @@ test('mobile layout has no horizontal page overflow and legal pages render', asy
   await expect(page.getByRole('heading', { level: 1, name: 'Terms' })).toBeVisible()
 })
 
-test('offline state explains that local tools remain available', async ({ page, context }, testInfo) => {
+test('offline reload remains usable and explains local availability', async ({ page, context }, testInfo) => {
   test.skip(testInfo.project.name.includes('mobile'), 'one offline smoke test is sufficient')
   await page.goto('/')
+  await page.evaluate(async () => {
+    await navigator.serviceWorker.ready
+    if (!navigator.serviceWorker.controller) {
+      await new Promise((resolve) => navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true }))
+    }
+  })
   await context.setOffline(true)
   await page.evaluate(() => window.dispatchEvent(new Event('offline')))
   await expect(page.getByText(/Offline mode/)).toBeVisible()
+  await page.reload({ waitUntil: 'domcontentloaded' })
+  await expect(page).toHaveTitle(/API Profile Guard/)
+  await expect(page.getByRole('heading', { level: 1, name: 'Know where the request is going.' })).toBeVisible()
   await context.setOffline(false)
 })

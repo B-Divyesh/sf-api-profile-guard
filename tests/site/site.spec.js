@@ -56,6 +56,13 @@ test('internal page navigation moves focus to the new heading', async ({ page })
   await page.getByRole('link', { name: 'Privacy', exact: true }).first().click()
   await expect(page).toHaveURL(/\/privacy\/$/)
   await expect(page.getByRole('heading', { level: 1 })).toBeFocused()
+
+  await page.goBack()
+  await expect(page.getByRole('heading', { level: 1, name: 'Block API requests to the wrong environment' })).toBeFocused()
+
+  await page.goto('/?demo=1#simulator')
+  await page.getByRole('link', { name: 'Privacy', exact: true }).first().click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Privacy for local API checks' })).toBeFocused()
 })
 
 test('first-screen sample action opens the recorded CLI demo in one click', async ({ page }) => {
@@ -64,7 +71,11 @@ test('first-screen sample action opens the recorded CLI demo in one click', asyn
   await expect(page).toHaveURL(/\?demo=1#cli-demo$/)
   await expect(page.getByText('Demo — sample data, nothing is saved')).toBeVisible()
   await expect(page.getByRole('heading', { level: 2, name: 'Run the bundled CLI sample' })).toBeFocused()
+  await expect(page.getByRole('heading', { level: 2, name: 'Run the bundled CLI sample' })).toBeInViewport()
   await expect(page.getByLabel('Terminal recording of the bundled CLI demo')).toContainText('wrong production host')
+  await page.getByRole('button', { name: 'Reset demo' }).click()
+  await expect(page.getByRole('heading', { level: 2, name: 'Check a request in your browser' })).toBeFocused()
+  await expect(page.locator('#result-stamp')).toHaveText('✕ BLOCKED')
 })
 
 test('simulator exposes allowed, blocked, and input-error states by keyboard', async ({ page }) => {
@@ -104,6 +115,16 @@ test('mobile layout has no horizontal page overflow and legal pages render', asy
   await expect(page.getByRole('heading', { level: 1, name: 'Privacy for local API checks' })).toBeVisible()
   await page.goto('/terms/')
   await expect(page.getByRole('heading', { level: 1, name: 'Terms for using API Profile Guard' })).toBeVisible()
+})
+
+test('pages remain usable at 200 percent text size', async ({ page }, testInfo) => {
+  test.skip(!testInfo.project.name.includes('mobile'), 'mobile viewport is the constrained text-resize case')
+  await page.goto('/?demo=1')
+  await page.addStyleTag({ content: 'html { font-size: 200% !important; }' })
+  const sizes = await page.evaluate(() => ({ width: document.documentElement.scrollWidth, viewport: innerWidth }))
+  expect(sizes.width).toBeLessThanOrEqual(sizes.viewport)
+  await expect(page.getByRole('button', { name: 'Reset demo' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Check request' })).toBeVisible()
 })
 
 test('offline reload remains usable and explains local availability', async ({ page, context }, testInfo) => {

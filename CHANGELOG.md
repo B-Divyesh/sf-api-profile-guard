@@ -12,6 +12,7 @@ Semantic Versioning.
 - Added the one-click browser demo, demo-only session storage, reset and exit
   controls, and offline demo caching.
 - Added the claims manifest and one clean-sandbox browser test per product claim.
+- Added source-install and browser-policy claims for the remaining public promises.
 
 ### Fixed
 
@@ -25,6 +26,8 @@ Semantic Versioning.
   MIME, CSP, Permissions-Policy, and real 404 response configuration.
 - Increased every footer navigation target to at least 44 by 44 CSS pixels.
 - Advanced the offline shell cache version so deployed repairs reach existing users.
+- Cleared demo state on every exit path and restored focus after back/forward navigation.
+- Made the one-click sample land on the recorded CLI result before the first frame.
 
 ## [0.1.0] - 2026-08-28
 

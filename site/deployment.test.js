@@ -27,7 +27,7 @@ test('Azure deployment config enforces caching, hardening, MIME, and a true 404'
 })
 
 test('service-worker cache version advances with the repaired shell', async () => {
-  assert.match(await read('./public/sw.js'), /const CACHE = 'apg-field-guide-v4'/)
+  assert.match(await read('./public/sw.js'), /const CACHE = 'apg-field-guide-v5'/)
 })
 
 test('every claim has one tagged test and one runnable command', async () => {

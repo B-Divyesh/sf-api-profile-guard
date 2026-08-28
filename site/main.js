@@ -4,6 +4,7 @@ import { inspectRequest } from './policy.js'
 const $ = (selector) => document.querySelector(selector)
 const demoMode = new URLSearchParams(location.search).get('demo') === '1' || /^\/demo\/?$/.test(location.pathname)
 const demoKey = 'demo:api-profile-guard:sample-v1'
+const routeFocusKey = 'apg:route-focus'
 
 const form = $('#preflight-form')
 const profile = $('#profile')
@@ -101,14 +102,40 @@ for (const button of document.querySelectorAll('[data-copy]')) {
   })
 }
 
-function setDemoSample() {
-  profile.value = 'production'
-  method.value = 'POST'
-  requestUrl.value = 'https://wrong.example/v1/orders'
-  acknowledgement.value = 'production'
+function setDemoSample(input = {}) {
+  profile.value = input.profileName || 'production'
+  method.value = input.method || 'POST'
+  requestUrl.value = input.requestUrl || 'https://wrong.example/v1/orders'
+  acknowledgement.value = input.acknowledgement || 'production'
   syncProductionField()
   checkRequest({ delay: false })
 }
+
+function restoreDemoSample() {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(demoKey))
+    if (saved && typeof saved === 'object') return setDemoSample(saved)
+  } catch {
+    sessionStorage.removeItem(demoKey)
+  }
+  setDemoSample()
+}
+
+function isDemoUrl(url) {
+  return url.origin === location.origin &&
+    (new URLSearchParams(url.search).get('demo') === '1' || /^\/demo\/?$/.test(url.pathname))
+}
+
+document.addEventListener('click', (event) => {
+  const link = event.target.closest('a[href]')
+  if (!link) return
+  const target = new URL(link.href, location.href)
+  if (demoMode && !isDemoUrl(target)) sessionStorage.removeItem(demoKey)
+  if (!isDemoUrl(target) && target.origin === location.origin &&
+      (target.pathname !== location.pathname || target.search !== location.search)) {
+    sessionStorage.setItem(routeFocusKey, '1')
+  }
+})
 
 if (demoMode) {
   document.body.classList.add('demo-mode')
@@ -118,26 +145,26 @@ if (demoMode) {
   document.querySelector('meta[property="og:title"]').content = 'Demo — API Profile Guard'
   document.querySelector('meta[property="og:url"]').content = 'https://api-profile-guard.sociobot.in/demo/'
   document.querySelector('meta[name="twitter:title"]').content = 'Demo — API Profile Guard'
-  setDemoSample()
+  restoreDemoSample()
   $('#reset-demo').addEventListener('click', () => {
     sessionStorage.removeItem(demoKey)
     setDemoSample()
     $('#reset-demo').textContent = 'Demo reset'
     window.setTimeout(() => ($('#reset-demo').textContent = 'Reset demo'), 2000)
+    $('#simulator').scrollIntoView({ behavior: 'instant' })
     $('#simulator-title').focus({ preventScroll: true })
   })
-  $('#leave-demo').addEventListener('click', () => {
-    sessionStorage.removeItem(demoKey)
-  })
-  requestAnimationFrame(() => {
+
+  const openDemoTarget = () => {
     const demoTarget = location.hash === '#cli-demo' ? $('#cli-demo') : $('#simulator')
     const demoHeading = demoTarget.querySelector('h2')
-    demoTarget.scrollIntoView()
+    demoTarget.scrollIntoView({ behavior: 'instant' })
     demoHeading.focus({ preventScroll: true })
-  })
+  }
+  if (document.readyState === 'complete') openDemoTarget()
+  else window.addEventListener('load', openDemoTarget, { once: true })
 }
 
-const routeFocusKey = 'apg:route-focus'
 if (!demoMode) {
   sessionStorage.removeItem(demoKey)
   if (sessionStorage.getItem(routeFocusKey) === '1') {
@@ -147,15 +174,18 @@ if (!demoMode) {
       $('#route-status').textContent = $('#hero-title').textContent
     })
   }
-  document.addEventListener('click', (event) => {
-    const link = event.target.closest('a[href]')
-    if (!link) return
-    const target = new URL(link.href, location.href)
-    if (target.origin === location.origin && target.pathname !== location.pathname) {
-      sessionStorage.setItem(routeFocusKey, '1')
-    }
-  })
 }
+
+window.addEventListener('pageshow', (event) => {
+  const navigation = performance.getEntriesByType('navigation')[0]
+  if (!event.persisted && navigation?.type !== 'back_forward') return
+  if (demoMode) restoreDemoSample()
+  const pageHeading = demoMode ? $('#simulator-title') : $('#hero-title')
+  requestAnimationFrame(() => {
+    pageHeading.focus()
+    $('#route-status').textContent = pageHeading.textContent
+  })
+})
 
 const networkStatus = $('#network-status')
 function paintNetworkStatus() {

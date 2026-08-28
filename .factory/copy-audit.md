@@ -23,8 +23,8 @@ No sentence exceeds 22 words. No sentence uses a banned marketing word.
 | 9 | Match the host, operation, body, and production phrase. | None |
 | 9 | Start the API client only when every check passes. | None |
 | 6 | Check a request in your browser | None |
-| 7 | The sample follows the CLI policy order. | None |
-| 9 | It does not start a client or send a request. | None |
+| 9 | Change the sample request and check its policy result. | None |
+| 9 | The browser sends no input and starts no client. | None |
 | 8 | Use an absolute URL to check its host. | None |
 | 3 | Type “production” exactly. | None |
 | 4 | No request checked yet | None |

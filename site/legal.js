@@ -23,9 +23,12 @@ document.addEventListener('click', (event) => {
 })
 
 window.addEventListener('pageshow', (event) => {
-  if (!event.persisted) return
-  heading?.focus()
-  if (status && heading) status.textContent = heading.textContent
+  const navigation = performance.getEntriesByType('navigation')[0]
+  if (!event.persisted && navigation?.type !== 'back_forward') return
+  requestAnimationFrame(() => {
+    heading?.focus()
+    if (status && heading) status.textContent = heading.textContent
+  })
 })
 
 if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {

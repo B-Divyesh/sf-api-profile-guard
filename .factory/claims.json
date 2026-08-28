@@ -63,11 +63,25 @@
     "sandbox": "fresh allowed sample; parse client stdout and APG stderr as separate JSON values"
   },
   {
+    "id": "source-checkout-install",
+    "claim": "A source checkout installs one apg 0.1.0 executable",
+    "where": "landing install command, README",
+    "test": "npm run test:claim -- --grep '@claim:source-checkout-install'",
+    "sandbox": "fresh Cargo install root; install the current checkout with the lockfile; assert one executable and its version"
+  },
+  {
     "id": "browser-demo-isolation",
     "claim": "The browser demo uses only demo-prefixed session storage and does not change real browser storage",
     "where": "demo banner, privacy, demo documentation",
     "test": "npm run test:claim -- --grep '@claim:browser-demo-isolation'",
     "sandbox": "fresh browser with real storage canaries; enter, change, reset, and leave demo; assert canaries unchanged and demo keys removed"
+  },
+  {
+    "id": "browser-policy-sample",
+    "claim": "The browser sample blocks a wrong production host and allows the approved host",
+    "where": "landing browser sample",
+    "test": "npm run test:claim -- --grep '@claim:browser-policy-sample'",
+    "sandbox": "fresh browser demo; assert the seeded wrong host is blocked, then change only the URL and assert the approved request passes"
   },
   {
     "id": "browser-input-local",

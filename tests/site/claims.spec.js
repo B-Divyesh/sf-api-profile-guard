@@ -162,6 +162,10 @@ test('@claim:production-policy', async ({}, testInfo) => {
   expect(cli(base, root).status).toBe(10)
   expect(cli([...base, '--ack-production', 'wrong'], root).status).toBe(10)
   expect(cli([...base, '--ack-production', 'production'], root).status).toBe(0)
+  expect(cli([
+    'check', '--profile', 'production', '--method', 'POST', '--url', 'https://wrong.example/v1/orders',
+    '--body-file', 'body.json', '--ack-production', 'production'
+  ], root).status).toBe(10)
   expect(cli(['check', '--profile', 'production', '--method', 'DELETE', '--url', '/v1/orders', '--body-file', 'body.json', '--ack-production', 'production'], root).status).toBe(10)
   rmSync(root, { recursive: true })
 })
@@ -179,6 +183,11 @@ test('@claim:policy-rule-order', async ({}, testInfo) => {
   const missingBody = cli(['check', '--profile', 'production', '--method', 'POST', '--url', '/v1/orders', '--ack-production', 'production'], root)
   expect(missingBody.status).toBe(10)
   expect(missingBody.stdout).toContain('body_required')
+  writeFileSync(`${root}/body.json`, '{"customer":{}}\n')
+  const missingPath = cli([...common, '--url', '/v1/orders'], root)
+  expect(missingPath.status).toBe(10)
+  expect(missingPath.stdout).toContain('required_json_field_missing:customer.id')
+  writeFileSync(`${root}/body.json`, '{"customer":{"id":"claim-customer"}}\n')
   expect(cli([...common, '--url', '/v1/orders'], root).status).toBe(0)
   rmSync(root, { recursive: true })
 })
@@ -205,27 +214,45 @@ test('@claim:clean-child-output', async ({}, testInfo) => {
   rmSync(root, { recursive: true })
 })
 
+test('@claim:source-checkout-install', async ({}, testInfo) => {
+  test.skip(testInfo.project.name.includes('mobile'), 'one clean source installation is sufficient')
+  const root = workspace('source-install')
+  const result = spawnSync('cargo', ['install', '--path', resolve('.'), '--root', root, '--locked'], { encoding: 'utf8' })
+  expect(result.status, result.stderr).toBe(0)
+  expect(readdirSync(`${root}/bin`)).toEqual(['apg'])
+  const version = spawnSync(`${root}/bin/apg`, ['--version'], { encoding: 'utf8' })
+  expect(version.status).toBe(0)
+  expect(version.stdout.trim()).toBe('apg 0.1.0')
+  rmSync(root, { recursive: true })
+})
+
 test('@claim:browser-demo-isolation', async ({ page, context }, testInfo) => {
   test.skip(testInfo.project.name.includes('mobile'), 'one clean browser sandbox is sufficient')
   await context.addInitScript(() => {
     localStorage.setItem('real:keep', 'local-value')
     sessionStorage.setItem('real:keep', 'session-value')
   })
-  await page.goto('/?demo=1')
+  await page.goto('/')
+  await page.getByRole('link', { name: 'Try it with sample data' }).click()
+  await expect(page).toHaveURL(/\?demo=1#cli-demo$/)
   await expect(page.getByText('Demo — sample data, nothing is saved')).toBeVisible()
   await expect(page.locator('#result-stamp')).toHaveText('✕ BLOCKED')
   expect(await page.evaluate(() => localStorage.getItem('real:keep'))).toBe('local-value')
   expect(await page.evaluate(() => sessionStorage.getItem('real:keep'))).toBe('session-value')
-  expect(await page.evaluate(() => Object.keys(sessionStorage).filter((key) => key.startsWith('demo:')))).toEqual([
-    'demo:api-profile-guard:sample-v1'
+  expect(await page.evaluate(() => Object.keys(sessionStorage).sort())).toEqual([
+    'demo:api-profile-guard:sample-v1', 'real:keep'
   ])
   await page.getByLabel('URL or path').fill('/v1/orders')
   await page.getByRole('button', { name: 'Check request' }).click()
+  await expect(page.locator('#result-stamp')).toHaveText('✓ ALLOWED')
+  await page.reload()
+  await expect(page.getByLabel('URL or path')).toHaveValue('/v1/orders')
   await expect(page.locator('#result-stamp')).toHaveText('✓ ALLOWED')
   await page.getByRole('button', { name: 'Reset demo' }).click()
   await expect(page.getByLabel('URL or path')).toHaveValue('https://wrong.example/v1/orders')
   await page.getByRole('link', { name: 'Start for real' }).click()
   await expect(page).toHaveURL(/\/$/)
+  await expect(page.getByRole('heading', { level: 1, name: 'Block API requests to the wrong environment' })).toBeFocused()
   expect(await page.evaluate(() => Object.keys(sessionStorage).filter((key) => key.startsWith('demo:')))).toEqual([])
   expect(await page.evaluate(() => localStorage.getItem('real:keep'))).toBe('local-value')
   expect(await page.evaluate(() => sessionStorage.getItem('real:keep'))).toBe('session-value')
@@ -235,6 +262,27 @@ test('@claim:browser-demo-isolation', async ({ page, context }, testInfo) => {
   expect(await page.evaluate(() => Object.keys(sessionStorage).filter((key) => key.startsWith('demo:')))).toEqual([])
   expect(await page.evaluate(() => localStorage.getItem('real:keep'))).toBe('local-value')
   expect(await page.evaluate(() => sessionStorage.getItem('real:keep'))).toBe('session-value')
+
+  await page.goto('/?demo=1')
+  const keysAfterExternalExit = await page.evaluate(() => new Promise((resolveKeys) => {
+    document.addEventListener('click', (event) => {
+      event.preventDefault()
+      resolveKeys(Object.keys(sessionStorage).filter((key) => key.startsWith('demo:')))
+    }, { once: true })
+    document.querySelector('.final-cta a').click()
+  }))
+  expect(keysAfterExternalExit).toEqual([])
+})
+
+test('@claim:browser-policy-sample', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes('mobile'), 'one clean browser policy sandbox is sufficient')
+  await page.goto('/?demo=1')
+  await expect(page.getByLabel('URL or path')).toHaveValue('https://wrong.example/v1/orders')
+  await expect(page.locator('#result-stamp')).toHaveText('✕ BLOCKED')
+  await expect(page.getByText(/not allowed for production/)).toBeVisible()
+  await page.getByLabel('URL or path').fill('/v1/orders')
+  await page.getByRole('button', { name: 'Check request' }).click()
+  await expect(page.locator('#result-stamp')).toHaveText('✓ ALLOWED')
 })
 
 test('@claim:browser-input-local', async ({ page }, testInfo) => {

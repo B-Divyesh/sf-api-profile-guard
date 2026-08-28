@@ -1,142 +1,131 @@
-# API Profile Guard v0.1.0 — handoff
+# API Profile Guard v0.1.0 — repair handoff
 
-## Independent verification status — FAIL
+Repair work order `api-profile-guard-repair-1` is complete. The release-blocking
+findings recorded in verifier commit `2976f13ef64bdb0b99a49b78a9a1d3c9d37ac2a9`
+for candidate `f67fc1baf8da7d2f1d117f19407cff9fe1c026fe` were reproduced,
+fixed, regression-tested, pushed, and deployed to
+<https://api-profile-guard.sociobot.in> on August 28, 2026 UTC.
 
-Candidate `f67fc1baf8da7d2f1d117f19407cff9fe1c026fe` was independently tested on
-2026-08-28 against `https://api-profile-guard.sociobot.in`. The live site matches
-the candidate byte-for-byte across 13 representative build files, so this is not a
-stale-deployment result.
+## Finding disposition
 
-Release is **FAIL**. Exact evidence and complete reproduction details are in
-`.factory/verification.md`.
+1. **Unavailable primary install — fixed.** The hero and README now use the
+   immediately working source command:
+   `cargo install --git https://github.com/B-Divyesh/sf-api-profile-guard.git --locked api-profile-guard`.
+   A clean install from public GitHub resolved commit `b700102a`, compiled, and
+   returned `apg 0.1.0`. Registry publishing was not attempted because credentials
+   belong to the factory.
+2. **Allowed `run --json` contaminated stdout — fixed.** Allowed runs reserve stdout
+   byte-for-byte for the child and write the preflight decision to stderr. `check`
+   and blocked `run` retain one decision object on stdout. Help and README state this
+   stream contract. The regression test parses child stdout and the independent
+   allowed decision as separate JSON values.
+3. **Deployment ignored cache policy — fixed.** The built site now contains an
+   Azure `staticwebapp.config.json`. Live hashed JS returns
+   `public, max-age=31536000, immutable`; `/sw.js` returns `no-cache`. Brotli and
+   ETag/304 remain working.
+4. **False-200 unknown routes — fixed.** Azure's 404 response override serves the
+   authored `404.html` with HTTP 404. `/does-not-exist` was verified live as 404 and
+   its body hash matches the build.
+5. **Hardening and manifest MIME — fixed.** Live responses include CSP,
+   Permissions-Policy, `nosniff`, strict referrer policy, HSTS, and DNS-prefetch
+   disabled. The manifest moved from `.webmanifest` (Azure served it as
+   `application/octet-stream`) to `/manifest.json`, which is live as
+   `application/json` and parses as JSON.
+6. **42px Terms target — fixed.** Footer links have a 44px minimum width and height.
+   Live computed sizes at desktop and 390px are Privacy 58.81×44, Terms 44×44, and
+   MIT license 92.42×44 CSS pixels.
 
-Blocking defects:
+The service-worker shell advanced to `apg-field-guide-v3`; activation removes old
+caches and a controlled offline reload succeeds. The researched brief and original
+pressroom visual system were preserved.
 
-1. **High:** the live primary command `cargo install api-profile-guard` fails because
-   crates.io has no such published crate and the repository has no release. The
-   README's source install works, but the deployed primary journey does not.
-2. **Medium:** allowed `apg --json run` output is not one JSON object when its child
-   writes stdout; JSON parsing fails on the child output appended after the decision.
-3. **Medium:** production ignores `_headers`; hashed assets and `sw.js` all receive
-   `public, must-revalidate, max-age=30` instead of immutable assets and no-cache SW.
+## Regression coverage
 
-Additional low-severity findings: unknown routes return the home page with HTTP 200,
-CSP and Permissions-Policy are absent, the manifest uses a generic binary MIME type,
-and one footer link measures 42x44 CSS px instead of 44x44.
+- `tests/cli.rs`: allowed JSON runs keep child stdout clean and independently emit
+  a parseable allowed decision on stderr.
+- `site/deployment.test.js`: the primary command is a Git install, Azure caching and
+  hardening routes are present, 404 remains a 404, and the shell cache version is
+  advanced.
+- `tests/site/site.spec.js`: exact install text, all footer target dimensions,
+  desktop/mobile axe scans, keyboard operation, 390px overflow, legal routes, and a
+  service-worker-controlled offline reload.
+- `site/live-check.mjs` / `npm run verify:live`: deployed desktop and mobile axe,
+  console errors, same-origin request policy, cookie/storage privacy, keyboard focus,
+  reduced motion, touch targets, legal pages, active cache version, and offline reload.
 
-Passing evidence: clean `npm ci`; 14/14 unit/integration/site tests; lint; exact Vite
-build; 6 Playwright passes with 2 intentional skips; release build; `cargo package`;
-isolated package install; seeded pre-network blocking; secret-free concurrent
-receipts; desktop/mobile keyboard and visual checks; zero axe findings; no console
-errors or third-party requests; service-worker update/offline reload; and live
-Lighthouse 100/100/100/100 with 1.16 s LCP, 0 ms TBT, and 0 CLS.
+## Verification evidence
 
-No product code was changed during verification. Only this handoff and the
-verification report were added/updated.
-
-## Original builder handoff (retained for context)
-
-The material below predates independent verification. Where it claims stable JSON,
-deployed cache headers, or release readiness, the FAIL verdict and evidence above
-supersede it.
-
-### What shipped
-
-- A publish-ready Rust package producing one `apg` binary with `check` and `run`
-  commands, clear help, stable `--json` output, documented exit codes, and no
-  interactive prompt in CI.
-- Literal dotenv parsing that never evaluates a shell and rejects `$` expansion,
-  command substitution, duplicate keys, malformed assignments, and multiline
-  values.
-- Named profiles with required variables, non-secret fingerprints, credential-class
-  labels, exact host allowlists, deny-first method/path rules, default-deny
-  production operations, exact production acknowledgement, body-size limits, and
-  required/forbidden JSON field paths.
-- Fail-closed execution: `apg run` spawns the requested client only after policy and
-  receipt writing succeed. Exact `{url}` arguments resolve to the checked URL, and
-  profile values are injected only into the child environment.
-- Append-only JSONL receipts containing decision metadata but no environment values,
-  headers, query strings, or request bodies.
-- A Vite static docs site in `dist/site/` with a real browser-only preflight
-  simulator; explicit empty, loading, allowed, blocked, input-error, and offline
-  states; keyboard and 390px layouts; privacy, terms, 404, sitemap, cache headers,
-  and versioned service-worker caching.
-- A product-specific dithered safety-manual visual system. The original hero was
-  generated with `/opt/fleet/lib/gen-image.sh` using the `factory-image` deployment,
-  converted to 145 KB WebP, and given a 49 KB mobile derivative. The full prompt and
-  provenance are in `.factory/design.md` and
-  `site/public/preflight-gate.webp.json`.
-
-## Run and verify
+Commands run from a clean dependency install:
 
 ```sh
 npm ci
+npm audit --audit-level=high
 npm test
+npm run lint
 npm run build
 npm run test:e2e
-npm run lint
 cargo build --release
 cargo package
+npm run verify:live
 ```
 
-- `npm test`: pass — 7 Rust unit tests, 3 Rust CLI integration tests, and 4 browser
-  policy tests. The seeded forbidden-production-host and missing-required-variable
-  matrices blocked 100%. Integration tests prove the child was not started and a
-  local TCP listener received no connection for a forbidden production host.
-- `npm run test:e2e`: pass — 6 Playwright checks passed across desktop Chromium and
-  a 390 × 844 Chromium viewport; 2 intentionally project-scoped checks skipped.
-  Includes allowed/blocked/error keyboard paths, mobile overflow, legal routes,
-  offline messaging, console errors, and axe. Axe found zero serious/critical
-  issues.
-- `npm run build`: pass — Vite output at exactly `dist/site/`, with `index.html` at
-  its root.
-- `npm run lint`: pass — `cargo fmt --check` and Clippy with warnings denied.
-- `cargo package`: pass — verified package, about 22 KB compressed. Publish later
-  with `cargo publish`; the factory owns registry credentials and no publish was
-  attempted.
-- `cargo build --release`: pass — stripped single binary at `target/release/apg`
-  (about 1.5 MB in this build environment).
-- Factory `verify-url.sh` against the production preview: HTTP 200, no console
-  errors, `lang=en`, one h1, main landmark present, no image missing alt text, and no
-  unlabeled button.
-- `npm audit --audit-level=high`: pass — 0 known vulnerabilities.
+- `npm ci`: 20 packages installed; audit found 0 vulnerabilities.
+- `npm test`: 7 Rust unit + 4 CLI integration + 7 site/deployment tests passed
+  (18 total, 0 failed).
+- `npm run lint`: Rust formatting and all-target Clippy with warnings denied passed.
+- `npm run build`: Vite 7.3.6 produced `dist/site/`.
+- `npm run test:e2e`: 6 passed across desktop Chromium and 390×844 Chromium; 2
+  intentional project-scope skips. Axe found zero serious/critical violations.
+- `cargo build --release`: stripped single `apg` binary, 1,565,712 bytes.
+- `cargo package`: 15 files, 77.2 KiB unpacked / 22.9 KiB compressed; package
+  verification compiled. An isolated install from its unpacked crate passed.
+- Public Git consumer install: passed from outside the checkout; version and full
+  help output passed.
+- Visual inspection: full-page 1440×900 and 390×844 renders had no clipping,
+  overlap, or horizontal page overflow.
+- Offline/update: the new `v3` cache took control, only the current cache remained,
+  the offline status appeared, and a network-disabled reload rendered the complete
+  home shell.
+- Privacy: no cookies, localStorage, sessionStorage, analytics, third-party scripts,
+  or cross-origin runtime requests on either viewport.
+- Factory `verify-url.sh`: HTTPS 200, title and `lang=en`, one h1, main landmark,
+  complete image alt text, labelled controls, 2,676 visible characters, and zero
+  console/page errors.
 
-## Lighthouse-class results
+Production payloads remain within budget: 5,100 bytes raw initial JavaScript,
+11,354 bytes CSS, 0 bytes fonts, 49,178-byte mobile hero, and 148,256-byte large
+hero. The deployed artifact upload was 236,859 bytes.
 
-Measured August 28, 2026 against `vite preview` with Lighthouse 12.8.2's mobile
-profile and headless Chromium:
+### Live Lighthouse 12.8.2 mobile profile
 
-| Category / metric | Result |
+| Metric | Result |
 | --- | ---: |
 | Performance | 100 |
 | Accessibility | 100 |
 | Best practices | 100 |
 | SEO | 100 |
-| LCP | 1.5 s |
-| Total blocking time | 0 ms |
+| FCP | 0.9 s |
+| LCP | 1.1 s |
+| TBT | 0 ms |
 | CLS | 0 |
+| Total transfer | 59 KiB |
 
-Built home payloads are about 5.1 KB initial JavaScript, 11.3 KB CSS, 0 KB fonts,
-and a 49 KB mobile hero. These are below the 200 KB JS, 50 KB CSS, 120 KB font, and
-300 KB hero budgets. Local preview results are evidence, not a promise of deployed
-network latency.
+### Deployment identity and policy
 
-## Known gaps and operational notes
+Local/live SHA-256 pairs matched exactly:
 
-- The tool is a wrapper, not an intercepting proxy. A child program can ignore the
-  request metadata passed to `apg`; teams should keep reviewed scripts and narrow
-  production allowlists. This boundary is explicit in the README and terms.
-- Host policy intentionally matches hostname only, without wildcard domains. Ports
-  are still preserved in the resolved URL passed to the child.
-- JSON field rules address object properties with dot paths; they do not currently
-  address array indices or JSON Pointer escaping.
-- Registry publishing, release binaries, signing, and static deployment remain with
-  the factory. No infrastructure, DNS, billing, or registry state was changed.
+- `index.html`: `b14a4bbd6d3f444935ebbac34b204e1a3f8a40896fb47240af19df220295b6d9`
+- `sw.js`: `4c9834cb0a91d63dac633594f9579136415902732d5d6026e23c26e58dc6e913`
+- `manifest.json`: `4b48563cb52abc53a9199850666ec3c0721e41dfbc3aadd34e26649898eef616`
+- `404.html`: `762d004059df6436f323f4d69a69acdf5f97e754227beb731e825df7c95413ff`
 
-## Suggested next steps
+HTTP redirects to HTTPS with 301. Conditional ETag returned 304. Deployment
+`109357f5-c9a7-4f58-9bfe-3f5d7af6b1e2` succeeded on Azure Static Web Apps and the
+custom domain reported Ready.
 
-1. Publish signed binaries and the crate from CI, then replace the landing page's
-   `cargo install` expectation with release-asset links where appropriate.
-2. Add shell-completion generation after the first release stabilizes the CLI.
-3. Consider an opt-in local proxy mode only if real-world clients cannot expose
-   reliable method/path/body metadata to the wrapper.
+## Known product boundary and next step
+
+The guard remains a wrapper, not an intercepting proxy: a child can ignore supplied
+request metadata. Keep reviewed scripts and narrow production allowlists. The
+package is ready for `cargo publish`, but the factory must perform registry
+publication; until then, the tested Git install is the truthful primary path.

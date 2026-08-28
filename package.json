@@ -10,6 +10,7 @@
     "test": "cargo test --all-targets && npm run test:site",
     "test:site": "node --test site/*.test.js",
     "test:e2e": "playwright test",
+    "verify:live": "node site/live-check.mjs https://api-profile-guard.sociobot.in",
     "lint": "cargo fmt --check && cargo clippy --all-targets -- -D warnings"
   },
   "devDependencies": {

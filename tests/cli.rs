@@ -207,3 +207,50 @@ fn allowed_json_run_keeps_child_stdout_parseable_and_separate() {
     assert_eq!(decision["profile"], "production");
     fs::remove_dir_all(root).unwrap();
 }
+
+#[test]
+fn demo_uses_only_a_new_temporary_workspace() {
+    let caller = sandbox("demo-caller");
+    fs::write(caller.join("keep.txt"), "unchanged").unwrap();
+    let before = fs::read_dir(&caller)
+        .unwrap()
+        .map(|entry| entry.unwrap().file_name())
+        .collect::<Vec<_>>();
+
+    let output = Command::new(binary())
+        .current_dir(&caller)
+        .arg("demo")
+        .output()
+        .unwrap();
+    assert_eq!(output.status.code(), Some(0));
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(stdout.contains("Sample 1 of 2 — wrong production host"));
+    assert!(stdout.contains("✕ BLOCKED"));
+    assert!(stdout.contains("Sample 2 of 2 — approved production request"));
+    assert!(stdout.contains("✓ ALLOWED"));
+
+    let workspace = stdout
+        .lines()
+        .find_map(|line| line.trim().strip_prefix("workspace: "))
+        .map(PathBuf::from)
+        .expect("demo workspace path");
+    assert!(workspace.starts_with(std::env::temp_dir()));
+    assert!(workspace.join("apg.toml").is_file());
+    assert!(workspace.join("production.env").is_file());
+    assert!(workspace.join("order.json").is_file());
+    assert_eq!(
+        fs::read_to_string(workspace.join("receipts.jsonl"))
+            .unwrap()
+            .lines()
+            .count(),
+        2
+    );
+    let after = fs::read_dir(&caller)
+        .unwrap()
+        .map(|entry| entry.unwrap().file_name())
+        .collect::<Vec<_>>();
+    assert_eq!(before, after, "demo wrote into the caller directory");
+
+    fs::remove_dir_all(workspace).unwrap();
+    fs::remove_dir_all(caller).unwrap();
+}

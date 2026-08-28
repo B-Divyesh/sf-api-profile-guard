@@ -2,9 +2,13 @@ import './style.css'
 import { inspectRequest } from './policy.js'
 
 const $ = (selector) => document.querySelector(selector)
+const demoMode = new URLSearchParams(location.search).get('demo') === '1' || /^\/demo\/?$/.test(location.pathname)
+const demoKey = 'demo:api-profile-guard:sample-v1'
 
 const form = $('#preflight-form')
 const profile = $('#profile')
+const method = $('#method')
+const requestUrl = $('#request-url')
 const acknowledgement = $('#acknowledgement')
 const acknowledgementField = $('#acknowledgement-field')
 const result = $('#preflight-result')
@@ -21,30 +25,14 @@ function syncProductionField() {
   if (!production) acknowledgement.value = ''
 }
 
-profile.addEventListener('change', syncProductionField)
-syncProductionField()
-
-form.addEventListener('submit', (event) => {
-  event.preventDefault()
-  submit.disabled = true
-  submit.textContent = 'Inspecting…'
-  result.dataset.state = 'loading'
-  resultTitle.textContent = 'Resolving profile and policy…'
-  resultDetails.textContent = 'No network connection is opened by this simulation.'
-  resultReasons.replaceChildren()
-
-  window.setTimeout(() => {
-    const outcome = inspectRequest({
-      profileName: profile.value,
-      method: $('#method').value,
-      requestUrl: $('#request-url').value,
-      acknowledgement: acknowledgement.value
-    })
-    paintResult(outcome)
-    submit.disabled = false
-    submit.textContent = 'Inspect request'
-  }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 180)
-})
+function currentInput() {
+  return {
+    profileName: profile.value,
+    method: method.value,
+    requestUrl: requestUrl.value,
+    acknowledgement: acknowledgement.value
+  }
+}
 
 function paintResult(outcome) {
   result.dataset.state = outcome.state
@@ -54,11 +42,11 @@ function paintResult(outcome) {
     outcome.state === 'allowed'
       ? 'Policy passed. The client may start.'
       : outcome.state === 'error'
-        ? 'The request could not be inspected.'
-        : 'Stopped before any connection.'
+        ? 'The request could not be checked.'
+        : 'Blocked before the client starts.'
   resultDetails.textContent = outcome.method
-    ? `${outcome.profile} · ${outcome.fingerprint} · ${outcome.method} ${outcome.host}${outcome.path} · ${outcome.credentialClass} credential class`
-    : 'Correct the input and inspect again.'
+    ? `${outcome.profile} · ${outcome.fingerprint} · ${outcome.method} ${outcome.host}${outcome.path} · ${outcome.credentialClass} credentials`
+    : 'Correct the input. Then check the request again.'
   resultReasons.replaceChildren(
     ...outcome.reasons.map((message) => {
       const item = document.createElement('li')
@@ -68,16 +56,42 @@ function paintResult(outcome) {
   )
 }
 
+function checkRequest({ delay = true } = {}) {
+  submit.disabled = true
+  submit.textContent = 'Checking…'
+  result.dataset.state = 'loading'
+  resultTitle.textContent = 'Reading the environment and policy…'
+  resultDetails.textContent = 'The browser sample does not open a network connection.'
+  resultReasons.replaceChildren()
+
+  const finish = () => {
+    const input = currentInput()
+    paintResult(inspectRequest(input))
+    if (demoMode) sessionStorage.setItem(demoKey, JSON.stringify(input))
+    submit.disabled = false
+    submit.textContent = 'Check request'
+  }
+  if (delay && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) window.setTimeout(finish, 180)
+  else finish()
+}
+
+profile.addEventListener('change', syncProductionField)
+syncProductionField()
+form.addEventListener('submit', (event) => {
+  event.preventDefault()
+  checkRequest()
+})
+
 for (const button of document.querySelectorAll('[data-copy]')) {
   button.addEventListener('click', async () => {
     const target = document.querySelector(button.dataset.copy)
     try {
       await navigator.clipboard.writeText(target.textContent.trim())
       const original = button.textContent
-      button.textContent = 'Copied'
+      button.textContent = 'Install command copied'
       window.setTimeout(() => (button.textContent = original), 2000)
     } catch {
-      button.textContent = 'Select and copy'
+      button.textContent = 'Select the install command'
       const selection = window.getSelection()
       selection.removeAllRanges()
       const range = document.createRange()
@@ -87,17 +101,74 @@ for (const button of document.querySelectorAll('[data-copy]')) {
   })
 }
 
+function setDemoSample() {
+  profile.value = 'production'
+  method.value = 'POST'
+  requestUrl.value = 'https://wrong.example/v1/orders'
+  acknowledgement.value = 'production'
+  syncProductionField()
+  checkRequest({ delay: false })
+}
+
+if (demoMode) {
+  document.body.classList.add('demo-mode')
+  $('#demo-banner').hidden = false
+  document.title = 'Demo — API Profile Guard'
+  document.querySelector('link[rel="canonical"]').href = 'https://api-profile-guard.sociobot.in/demo/'
+  document.querySelector('meta[property="og:title"]').content = 'Demo — API Profile Guard'
+  document.querySelector('meta[property="og:url"]').content = 'https://api-profile-guard.sociobot.in/demo/'
+  document.querySelector('meta[name="twitter:title"]').content = 'Demo — API Profile Guard'
+  setDemoSample()
+  $('#reset-demo').addEventListener('click', () => {
+    sessionStorage.removeItem(demoKey)
+    setDemoSample()
+    $('#reset-demo').textContent = 'Demo reset'
+    window.setTimeout(() => ($('#reset-demo').textContent = 'Reset demo'), 2000)
+    $('#simulator-title').focus({ preventScroll: true })
+  })
+  $('#leave-demo').addEventListener('click', () => {
+    sessionStorage.removeItem(demoKey)
+  })
+  requestAnimationFrame(() => {
+    $('#simulator').scrollIntoView()
+    $('#simulator-title').focus({ preventScroll: true })
+  })
+}
+
+const routeFocusKey = 'apg:route-focus'
+if (!demoMode) {
+  if (sessionStorage.getItem(routeFocusKey) === '1') {
+    sessionStorage.removeItem(routeFocusKey)
+    requestAnimationFrame(() => {
+      $('#hero-title').focus()
+      $('#route-status').textContent = $('#hero-title').textContent
+    })
+  }
+  document.addEventListener('click', (event) => {
+    const link = event.target.closest('a[href]')
+    if (!link) return
+    const target = new URL(link.href, location.href)
+    if (target.origin === location.origin && target.pathname !== location.pathname) {
+      sessionStorage.setItem(routeFocusKey, '1')
+    }
+  })
+}
+
 const networkStatus = $('#network-status')
 function paintNetworkStatus() {
-  const offline = !navigator.onLine
-  networkStatus.hidden = !offline
-  networkStatus.textContent = offline
-    ? 'Offline mode — the docs and policy simulator still work locally.'
-    : ''
+  networkStatus.hidden = navigator.onLine
+  networkStatus.textContent = navigator.onLine ? '' : 'Offline — this guide and its sample still work.'
 }
 window.addEventListener('online', paintNetworkStatus)
 window.addEventListener('offline', paintNetworkStatus)
 paintNetworkStatus()
+
+window.addEventListener('popstate', () => {
+  const target = location.hash ? document.querySelector(location.hash) : $('#hero-title')
+  const heading = target?.matches('h1, h2') ? target : target?.querySelector('h1, h2') || $('#hero-title')
+  heading.focus()
+  $('#route-status').textContent = heading.textContent
+})
 
 if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
   window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}))

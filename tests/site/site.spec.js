@@ -27,36 +27,74 @@ test('home is accessible and has no console errors', async ({ page }) => {
   }
 })
 
+test('every route has complete metadata, common navigation, and no serious accessibility findings', async ({ page }) => {
+  const routes = [
+    ['/', 'API Profile Guard — block wrong-environment requests'],
+    ['/demo/', 'Demo — API Profile Guard'],
+    ['/privacy/', 'Privacy — API Profile Guard'],
+    ['/terms/', 'Terms — API Profile Guard'],
+    ['/404.html', 'Page not found — API Profile Guard']
+  ]
+  for (const [path, title] of routes) {
+    await page.goto(path)
+    await expect(page).toHaveTitle(title)
+    await expect(page.locator('h1')).toHaveCount(1)
+    await expect(page.locator('main')).toHaveCount(1)
+    await expect(page.locator('header nav')).toHaveCount(1)
+    await expect(page.locator('footer')).toHaveCount(1)
+    await expect(page.locator('link[rel="canonical"]')).toHaveCount(1)
+    await expect(page.locator('meta[property="og:title"]')).toHaveCount(1)
+    await expect(page.locator('meta[name="twitter:card"]')).toHaveCount(1)
+    await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveCount(1)
+    const scan = await new AxeBuilder({ page }).analyze()
+    expect(scan.violations.filter(({ impact }) => ['serious', 'critical'].includes(impact)), path).toEqual([])
+  }
+})
+
+test('internal page navigation moves focus to the new heading', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('link', { name: 'Privacy', exact: true }).first().click()
+  await expect(page).toHaveURL(/\/privacy\/$/)
+  await expect(page.getByRole('heading', { level: 1 })).toBeFocused()
+})
+
 test('simulator exposes allowed, blocked, and input-error states by keyboard', async ({ page }) => {
   await page.goto('/#simulator')
-  const profile = page.getByLabel('Profile', { exact: true })
+  const profile = page.getByLabel('Environment', { exact: true })
   await profile.selectOption('production')
   await page.getByLabel('Method').selectOption('POST')
   await page.getByLabel('URL or path').fill('/v1/orders')
-  await page.getByLabel('Production phrase').fill('production')
-  await page.getByRole('button', { name: 'Inspect request' }).focus()
+  await page.getByLabel('Production confirmation phrase').fill('production')
+  await page.getByRole('button', { name: 'Check request' }).focus()
   await page.keyboard.press('Enter')
-  await expect(page.getByText('✓ ALLOWED')).toBeVisible()
+  await expect(page.locator('#result-stamp')).toHaveText('✓ ALLOWED')
 
   await page.getByLabel('URL or path').fill('https://wrong.example/v1/orders')
-  await page.getByRole('button', { name: 'Inspect request' }).click()
-  await expect(page.getByText('✕ BLOCKED')).toBeVisible()
+  await page.getByRole('button', { name: 'Check request' }).click()
+  await expect(page.locator('#result-stamp')).toHaveText('✕ BLOCKED')
   await expect(page.getByText(/not allowed for production/)).toBeVisible()
 
   await page.getByLabel('URL or path').fill('mailto:test@example.com')
-  await page.getByRole('button', { name: 'Inspect request' }).click()
+  await page.getByRole('button', { name: 'Check request' }).click()
   await expect(page.getByText('! INPUT ERROR')).toBeVisible()
 })
 
 test('mobile layout has no horizontal page overflow and legal pages render', async ({ page }, testInfo) => {
   test.skip(!testInfo.project.name.includes('mobile'), 'mobile-only viewport assertion')
-  await page.goto('/')
-  const sizes = await page.evaluate(() => ({ width: document.documentElement.scrollWidth, viewport: innerWidth }))
-  expect(sizes.width).toBeLessThanOrEqual(sizes.viewport)
+  for (const path of ['/', '/?demo=1', '/privacy/', '/terms/', '/404.html']) {
+    await page.goto(path)
+    const sizes = await page.evaluate(() => ({ width: document.documentElement.scrollWidth, viewport: innerWidth }))
+    expect(sizes.width, path).toBeLessThanOrEqual(sizes.viewport)
+    const undersized = await page.locator('a:visible, button:visible, input:visible, select:visible, [tabindex="0"]:visible').evaluateAll((items) =>
+      items.map((item) => ({ name: item.getAttribute('aria-label') || item.textContent?.trim() || item.id, box: item.getBoundingClientRect().toJSON() }))
+        .filter(({ box }) => box.width < 44 || box.height < 44)
+    )
+    expect(undersized, path).toEqual([])
+  }
   await page.goto('/privacy/')
-  await expect(page.getByRole('heading', { level: 1, name: 'Privacy' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Privacy for local API checks' })).toBeVisible()
   await page.goto('/terms/')
-  await expect(page.getByRole('heading', { level: 1, name: 'Terms' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Terms for using API Profile Guard' })).toBeVisible()
 })
 
 test('offline reload remains usable and explains local availability', async ({ page, context }, testInfo) => {
@@ -70,9 +108,9 @@ test('offline reload remains usable and explains local availability', async ({ p
   })
   await context.setOffline(true)
   await page.evaluate(() => window.dispatchEvent(new Event('offline')))
-  await expect(page.getByText(/Offline mode/)).toBeVisible()
+  await expect(page.getByText(/Offline/)).toBeVisible()
   await page.reload({ waitUntil: 'domcontentloaded' })
   await expect(page).toHaveTitle(/API Profile Guard/)
-  await expect(page.getByRole('heading', { level: 1, name: 'Know where the request is going.' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: 'Block API requests to the wrong environment' })).toBeVisible()
   await context.setOffline(false)
 })

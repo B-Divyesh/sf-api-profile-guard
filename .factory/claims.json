@@ -1,0 +1,107 @@
+[
+  {
+    "id": "cli-demo-sandbox",
+    "claim": "apg demo creates a temporary workspace, blocks one sample, allows one sample, and leaves the caller directory unchanged",
+    "where": "landing CLI demo, README",
+    "test": "npm run test:claim -- --grep '@claim:cli-demo-sandbox'",
+    "sandbox": "fresh caller directory; bundled sample; assert two receipts exist only in the printed OS temp directory"
+  },
+  {
+    "id": "blocked-host-no-client",
+    "claim": "A forbidden host is blocked before the client starts or connects",
+    "where": "landing policy section, README, privacy",
+    "test": "npm run test:claim -- --grep '@claim:blocked-host-no-client'",
+    "sandbox": "fresh policy and local TCP listener; assert exit 10, no child marker, and zero accepted connections"
+  },
+  {
+    "id": "check-no-network",
+    "claim": "apg check evaluates and receipts an allowed request without opening a network connection",
+    "where": "CLI help and README",
+    "test": "npm run test:claim -- --grep '@claim:check-no-network'",
+    "sandbox": "fresh allowed policy targeting a local TCP listener; assert exit 0 and zero accepted connections"
+  },
+  {
+    "id": "missing-variable-no-client",
+    "claim": "A missing required environment value is blocked before the client starts",
+    "where": "README",
+    "test": "npm run test:claim -- --grep '@claim:missing-variable-no-client'",
+    "sandbox": "fresh policy missing API_TOKEN; assert exit 10 and no child marker"
+  },
+  {
+    "id": "receipt-redaction",
+    "claim": "Receipts exclude environment values, headers, query strings, and request bodies",
+    "where": "landing policy section, README, privacy",
+    "test": "npm run test:claim -- --grep '@claim:receipt-redaction'",
+    "sandbox": "fresh sample policy with value, query, and body canaries; assert the exact receipt schema and absence of every canary"
+  },
+  {
+    "id": "literal-environment-files",
+    "claim": "APG reads environment files as text and rejects shell expansion and command substitution",
+    "where": "landing policy section, README",
+    "test": "npm run test:claim -- --grep '@claim:literal-environment-files'",
+    "sandbox": "fresh environment file containing command substitution; assert input error and no expansion marker"
+  },
+  {
+    "id": "production-policy",
+    "claim": "Production requests require an allowed host, an allowed operation, and the exact production confirmation phrase",
+    "where": "landing steps and policy section, README",
+    "test": "npm run test:claim -- --grep '@claim:production-policy'",
+    "sandbox": "fresh production policy; assert missing and wrong phrases block, disallowed operations block, and the exact allowed request passes"
+  },
+  {
+    "id": "policy-rule-order",
+    "claim": "Checked URLs use HTTP or HTTPS and an exact allowed host; deny rules beat allow rules; required JSON paths are enforced; exits distinguish pass, block, and invalid input",
+    "where": "README policy and exit-code sections",
+    "test": "npm run test:claim -- --grep '@claim:policy-rule-order'",
+    "sandbox": "fresh production policy; exercise invalid scheme, deceptive host, overlapping deny, missing body, and allowed nested JSON with exact exit codes"
+  },
+  {
+    "id": "clean-child-output",
+    "claim": "An allowed run substitutes the checked URL, passes environment values without printing them, keeps client output clean, writes the decision to standard error, and returns the client exit code",
+    "where": "README",
+    "test": "npm run test:claim -- --grep '@claim:clean-child-output'",
+    "sandbox": "fresh allowed sample; parse client stdout and APG stderr as separate JSON values"
+  },
+  {
+    "id": "browser-demo-isolation",
+    "claim": "The browser demo uses only demo-prefixed session storage and does not change real browser storage",
+    "where": "demo banner, privacy, demo documentation",
+    "test": "npm run test:claim -- --grep '@claim:browser-demo-isolation'",
+    "sandbox": "fresh browser with real storage canaries; enter, change, reset, and leave demo; assert canaries unchanged and demo keys removed"
+  },
+  {
+    "id": "browser-input-local",
+    "claim": "The browser sample does not send entered request data or start a client",
+    "where": "landing browser sample, privacy",
+    "test": "npm run test:claim -- --grep '@claim:browser-input-local'",
+    "sandbox": "fresh demo after network idle; change and check the sample; assert zero subsequent browser requests"
+  },
+  {
+    "id": "offline-demo-reload",
+    "claim": "The browser demo reloads offline after the first visit",
+    "where": "README, privacy, offline status",
+    "test": "npm run test:claim -- --grep '@claim:offline-demo-reload'",
+    "sandbox": "fresh browser; load demo, wait for service-worker control, disable network, reload, and assert the sample result"
+  },
+  {
+    "id": "no-account-demo",
+    "claim": "The sample works without an account",
+    "where": "landing first screen, README",
+    "test": "npm run test:claim -- --grep '@claim:no-account-demo'",
+    "sandbox": "fresh browser context; open demo directly; assert the result appears without auth responses or credential fields"
+  },
+  {
+    "id": "website-privacy",
+    "claim": "The website loads no analytics, advertisements, cookies, or third-party runtime scripts",
+    "where": "privacy",
+    "test": "npm run test:claim -- --grep '@claim:website-privacy'",
+    "sandbox": "fresh browser context; record the full demo load; assert every request is same-origin and no cookies exist"
+  },
+  {
+    "id": "mit-license",
+    "claim": "API Profile Guard is free software under the MIT License",
+    "where": "landing first screen, README, terms",
+    "test": "npm run test:claim -- --grep '@claim:mit-license'",
+    "sandbox": "fresh clone; assert the repository license text and Cargo package metadata both specify MIT"
+  }
+]

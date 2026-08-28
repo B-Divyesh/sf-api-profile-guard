@@ -1,25 +1,38 @@
 # API Profile Guard
 
-API Profile Guard (`apg`) is a local, client-agnostic preflight for developers who
-switch API requests between development, staging, and production. It resolves a
-named dotenv profile without executing it, checks the resolved host, operation, and
-body policy, requires an exact production acknowledgement, and only then starts
-your HTTP client or script.
+Block API requests to the wrong environment.
 
-No secrets, headers, or request bodies are written to receipts. There is no
-telemetry, account, hosted secret store, or runtime network dependency beyond the
-request made by the command you explicitly run.
+API Profile Guard (`apg`) is for developers who switch between development,
+staging, and production. It checks local policy before starting an API client.
 
-## Install
+## Try the isolated sample
 
-Install the single Rust binary directly from the public source repository:
+Run the bundled CLI sample with no setup:
+
+```sh
+apg demo
+```
+
+The command creates a new OS temporary directory. It checks one blocked request
+and one allowed request. It prints every sample file and receipt location. It does
+not change the caller directory.
+
+Open the [browser sample](https://api-profile-guard.sociobot.in/?demo=1) to inspect
+the sample policy. Its banner identifies sample mode. Reset restores the wrong-host
+request. Start for real removes demo session state.
+
+See [`.factory/demo.md`](.factory/demo.md) for the sample data and isolation model.
+
+## Install from source
+
+Install the single Rust binary from the public repository:
 
 ```sh
 cargo install --git https://github.com/B-Divyesh/sf-api-profile-guard.git --locked api-profile-guard
 apg --help
 ```
 
-Or clone it and build from a reviewed checkout:
+Or build from a reviewed checkout:
 
 ```sh
 git clone https://github.com/B-Divyesh/sf-api-profile-guard.git
@@ -28,11 +41,7 @@ cargo install --path .
 apg --help
 ```
 
-The factory publishes registry packages and release binaries separately. Version
-`0.1.0` is ready for `cargo install api-profile-guard` after registry publication;
-the Git install above works before that publication occurs.
-
-## Usage
+## Configure an environment policy
 
 Create `apg.toml` in the project root:
 
@@ -61,11 +70,12 @@ max_body_bytes = 65536
 forbidden_json_fields = ["debug", "skip_confirmation"]
 ```
 
-Dotenv files use literal `KEY=value` lines. Single and double quotes are supported;
-shell expansion, command substitution, and multiline values are rejected rather
-than executed.
+APG reads environment files as text. It rejects shell expansion and command
+substitution.
 
-Preview a request. `check` never opens a network connection:
+## Run a checked API request
+
+Check a request without starting a client:
 
 ```sh
 apg check \
@@ -76,16 +86,13 @@ apg check \
   --ack-production production
 ```
 
-Use `--json` for one stable, script-friendly decision object from `check` (and from
-a blocked `run`):
+Use `--json` to print one decision object:
 
 ```sh
 apg --json check --profile development --method GET --url /v1/health
 ```
 
-Run an existing client only after the check passes. The exact `{url}` argument is
-replaced with the resolved URL, and profile variables are passed to the child
-process without printing them:
+Run a client only after the policy passes:
 
 ```sh
 apg run \
@@ -97,66 +104,69 @@ apg run \
   -- curl --fail-with-body -X POST --data-binary @request.json '{url}'
 ```
 
-`run` is intentionally non-interactive, including in CI. It never starts the child
-when the preflight is blocked. If body rules apply, pass `--body-file` so the exact
-bytes can be inspected locally; bodies and headers are never copied into receipts.
-For an allowed `run`, child stdout is preserved byte-for-byte so response pipelines
-stay valid; the guard decision is written to stderr (as JSON when `--json` is set).
+APG replaces an exact `{url}` argument with the checked URL. It passes environment
+values to the client without printing them.
 
-### Policy behavior
+For an allowed run, the client response stays on standard output. APG writes its
+decision to standard error.
 
-- Every request must resolve to an `http` or `https` URL whose hostname exactly
-  matches `allowed_hosts`.
-- `deny` rules win over `allow` rules. Rules are `METHOD /path/*` patterns with `*`
-  wildcards. Query strings are not matched or logged.
-- Production is default-deny: at least one `allow` rule must match and
-  `--ack-production` must exactly match the profile acknowledgement.
-- Non-production profiles allow operations by default when `allow` is empty, while
-  still enforcing host, required-variable, deny, and body rules.
-- `required_json_fields` and `forbidden_json_fields` use dot paths such as
-  `customer.id`. A required-field policy blocks when no body file is supplied.
-- Receipts include time, decision, reason codes, profile fingerprint, method, host,
-  and path—never environment values, headers, query strings, or body content.
+## API request policy rules
 
-### Exit codes
+- Every checked URL must use HTTP or HTTPS.
+- The URL host must exactly match `allowed_hosts`.
+- A matching `deny` rule wins over an `allow` rule.
+- Production requires an allowed operation and the exact production confirmation phrase.
+- A missing required environment value blocks the client.
+- JSON field rules use paths such as `customer.id`.
+- Receipts exclude environment values, headers, query strings, and request bodies.
 
-| Code | Meaning |
-| ---: | --- |
-| `0` | preflight allowed; child also exited successfully when using `run` |
-| `2` | invalid CLI usage, config, dotenv, URL, or body input |
-| `10` | policy blocked the request; no child process was started |
-| other | the child process exit code from `run` |
+Exit `0` means the check passed. Exit `10` means policy blocked the request before
+the client started. Exit `2` means the input or local configuration is invalid.
+An allowed `run` returns the client exit code.
+
+## Verified product claims
+
+Every material product promise maps to one clean-sandbox test in
+[`.factory/claims.json`](.factory/claims.json). The suite covers the CLI demo,
+policy blocking, receipt redaction, browser isolation, privacy, and offline reload.
+
+Run any listed command directly. For example:
+
+```sh
+npm run test:claim -- --grep '@claim:cli-demo-sandbox'
+npm run test:claim -- --grep '@claim:offline-demo-reload'
+```
 
 ## Develop and verify
 
-Requirements: Rust 1.85+ and Node.js 20+.
+Requirements are Rust 1.85 or newer and Node.js 20 or newer.
 
 ```sh
-npm install
+npm ci
 npm test
-npm run build       # static site -> dist/site
+npm run lint
+npm run build
+npm run test:e2e
 cargo build --release
 cargo package
 ```
 
-`npm test` runs the Rust unit/integration suite and site behavior tests. The static
-landing/docs site is built with Vite and contains a browser-only policy simulator;
-it does not send or persist entered data.
+`npm run build` creates the static site in `dist/site/`. The browser sample reloads
+offline after its first visit. It works without an account.
 
-## Deploy the docs site
+## Deploy the static guide
 
-Deploy the contents of `dist/site/` to any static host. The factory owns deployment
-for <https://api-profile-guard.sociobot.in>; this repository contains no DNS,
-billing, analytics, or infrastructure mutation.
+Deploy `dist/site/` to a static host. The factory deploys the public site at
+<https://api-profile-guard.sociobot.in>.
 
-## Privacy and security scope
+## Safety limit
 
-This is a safety checkpoint, not a security boundary. A child command can ignore
-the metadata you supplied to `apg`; review scripts and keep production allowlists
-narrow. Protect dotenv files with normal filesystem permissions and do not commit
-them. See the [privacy page](https://api-profile-guard.sociobot.in/privacy/) and
-[terms](https://api-profile-guard.sociobot.in/terms/) for the public site.
+APG is a safety checkpoint, not an authorization system. A client can ignore the
+metadata supplied to APG. Review client commands and keep production allowlists narrow.
+
+Read the public [privacy policy](https://api-profile-guard.sociobot.in/privacy/)
+and [terms](https://api-profile-guard.sociobot.in/terms/).
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+API Profile Guard is free software under the [MIT License](LICENSE).

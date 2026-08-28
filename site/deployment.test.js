@@ -27,5 +27,31 @@ test('Azure deployment config enforces caching, hardening, MIME, and a true 404'
 })
 
 test('service-worker cache version advances with the repaired shell', async () => {
-  assert.match(await read('./public/sw.js'), /const CACHE = 'apg-field-guide-v3'/)
+  assert.match(await read('./public/sw.js'), /const CACHE = 'apg-field-guide-v4'/)
+})
+
+test('every claim has one tagged test and one runnable command', async () => {
+  const claims = JSON.parse(await read('../.factory/claims.json'))
+  const source = await read('../tests/site/claims.spec.js')
+  const ids = claims.map(({ id }) => id)
+  assert.equal(new Set(ids).size, ids.length)
+  for (const claim of claims) {
+    assert.equal(claim.test, `npm run test:claim -- --grep '@claim:${claim.id}'`)
+    assert.equal(source.match(new RegExp(`@claim:${claim.id.replaceAll('-', '\\-')}`, 'g'))?.length, 1)
+  }
+  const tags = [...source.matchAll(/@claim:([a-z0-9-]+)/g)].map((match) => match[1])
+  assert.deepEqual(tags.sort(), [...ids].sort())
+})
+
+test('all authored routes carry complete sharing metadata and common chrome', async () => {
+  for (const file of ['./index.html', './privacy/index.html', './terms/index.html', './404.html']) {
+    const html = await read(file)
+    assert.match(html, /<link rel="canonical"/)
+    assert.match(html, /property="og:title"/)
+    assert.match(html, /name="twitter:card"/)
+    assert.match(html, /rel="apple-touch-icon"/)
+    assert.match(html, /aria-label="Primary navigation"/)
+    assert.match(html, /<footer>/)
+    assert.match(html, /Built by Param Factory · v0\.1\.0\+repair\.1/)
+  }
 })

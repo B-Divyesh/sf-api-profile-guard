@@ -5,8 +5,20 @@ Semantic Versioning.
 
 ## [Unreleased]
 
+### Added
+
+- Added `apg demo` with bundled production-policy fixtures in an isolated OS
+  temporary directory.
+- Added the one-click browser demo, demo-only session storage, reset and exit
+  controls, and offline demo caching.
+- Added the claims manifest and one clean-sandbox browser test per product claim.
+
 ### Fixed
 
+- Replaced the first-screen metaphor and technical labels with direct job, user,
+  and sample-result wording.
+- Completed demo, legal, and 404 route metadata, shared navigation, focus transfer,
+  mobile layout, touch targets, and social artwork.
 - Kept allowed child stdout clean by writing `run` preflight details to stderr.
 - Replaced the unpublished registry install prompt with a working Git install.
 - Added Azure-native immutable asset caching, service-worker revalidation, manifest

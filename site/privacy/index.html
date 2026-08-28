@@ -3,35 +3,56 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Privacy policy for API Profile Guard." />
     <meta name="theme-color" content="#f4efd9" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="description" content="Learn which local files API Profile Guard reads, what receipts contain, and how the static website handles browser data." />
+    <meta property="og:title" content="Privacy — API Profile Guard" />
+    <meta property="og:description" content="Learn how the CLI and browser sample handle your data." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://api-profile-guard.sociobot.in/privacy/" />
+    <meta property="og:image" content="https://api-profile-guard.sociobot.in/social-card.webp" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="A halftone inspection gate stops one unsafe API request stream." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Privacy — API Profile Guard" />
+    <meta name="twitter:description" content="Learn how the CLI and browser sample handle your data." />
+    <meta name="twitter:image" content="https://api-profile-guard.sociobot.in/social-card.webp" />
     <link rel="canonical" href="https://api-profile-guard.sociobot.in/privacy/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="manifest" href="/manifest.json" />
     <title>Privacy — API Profile Guard</title>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to main content</a>
+    <div id="route-status" class="visually-hidden" role="status" aria-live="polite"></div>
     <header class="masthead">
       <a class="brand" href="/" aria-label="API Profile Guard home"><svg aria-hidden="true" width="34" height="34" viewBox="0 0 34 34"><path d="M4 3h18v7h8v21H4z" fill="none" stroke="currentColor" stroke-width="3"/><path d="M10 18l4 4 10-11" fill="none" stroke="currentColor" stroke-width="3"/></svg><span><b>API</b> Profile Guard</span></a>
-      <nav aria-label="Primary navigation"><a href="/">Back home</a></nav>
+      <nav aria-label="Primary navigation"><a href="/?demo=1#simulator">Demo</a><a href="/#install">Install</a><a href="/#policy">Policy</a><a href="/privacy/" aria-current="page">Privacy</a></nav>
     </header>
     <main id="main" class="legal-main">
       <p class="eyebrow">Plain-language policy</p>
-      <h1>Privacy</h1>
+      <h1 tabindex="-1">Privacy for local API checks</h1>
       <p class="effective">Effective August 28, 2026</p>
-      <h2>The CLI</h2>
-      <p>API Profile Guard runs on your machine. It does not send profile variables, secrets, request headers, bodies, history, or receipts to us. It has no telemetry. The only network request made during guarded use is the one made by the child command you explicitly approve.</p>
-      <p>Decision receipts are local JSONL files at the path you configure. They contain profile names, non-secret fingerprints, methods, hosts, paths without query strings, decision codes, credential-class labels, and timestamps. You control and may delete those files.</p>
-      <h2>This website</h2>
-      <p>The website has no analytics, advertising, cookies, accounts, forms, or third-party runtime scripts. The preflight simulator runs entirely in your browser and does not transmit or persist its inputs. A service worker stores public site files in your browser cache so the documentation works offline.</p>
-      <h2>Infrastructure logs</h2>
-      <p>Our static host may process short-lived security and delivery logs such as IP address, requested path, user agent, and time. We do not combine these logs with profiles or sell them. The repository does not configure analytics.</p>
-      <h2>Your choices</h2>
-      <p>You can remove the site's offline cache through your browser settings and remove local receipts from your project. Because the product has no account, there is no hosted profile to delete.</p>
+      <h2>Files the CLI uses</h2>
+      <p>API Profile Guard reads the policy, environment file, and optional request body you name.</p>
+      <p>It writes decision receipts only to the local path in your policy.</p>
+      <h2>Data kept out of receipts</h2>
+      <p>Receipts exclude environment values, headers, query strings, and request bodies.</p>
+      <p>They include the environment name, fingerprint, method, host, path, decision codes, credential label, and time.</p>
+      <h2>Approved network requests</h2>
+      <p>APG checks policy before starting your client. A blocked run starts no client and opens no client connection.</p>
+      <p>Your approved client command controls any request made after a passing check.</p>
+      <h2>Browser sample data</h2>
+      <p>The browser sample sends no input to a server. Demo state uses only a <code>demo:</code> session-storage key.</p>
+      <p>Leaving the demo removes that key. It does not read or change other browser storage.</p>
+      <h2>Static website delivery</h2>
+      <p>The website loads no analytics, advertisements, cookies, or third-party runtime scripts.</p>
+      <p>A service worker caches public site files so the sample can reload offline.</p>
       <h2>Contact</h2>
       <p>Open a privacy issue in the <a href="https://github.com/B-Divyesh/sf-api-profile-guard/issues">public repository</a>. Do not include secrets or production request details.</p>
     </main>
-    <footer><p><b>API Profile Guard</b> · Local by default.</p><nav aria-label="Legal navigation"><a href="/privacy/" aria-current="page">Privacy</a><a href="/terms/">Terms</a></nav></footer>
+    <footer><p><b>API Profile Guard</b> · Block wrong-environment API requests.</p><nav aria-label="Footer navigation"><a href="/privacy/" aria-current="page">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-api-profile-guard">Source</a></nav><p>Built by Param Factory · v0.1.0+repair.1</p></footer>
     <script type="module" src="/legal.js"></script>
   </body>
 </html>

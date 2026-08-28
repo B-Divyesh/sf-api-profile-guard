@@ -87,6 +87,9 @@ or auto-plays.
   is used on small screens; both stay below the 300 KB budget.
 - UI marks, check symbols, arrows, dotted fields, and registration cross are drawn
   in CSS/inline SVG by this project and contain no third-party artwork.
+- `site/public/social-card.webp` is a 1200×630 center crop of the original generated
+  pressroom illustration. `site/public/apple-touch-icon.png` is a square crop of
+  that same original art. Both derivatives were made locally with ImageMagick.
 
 Generation prompt (verbatim):
 

@@ -42,6 +42,18 @@ body {
   line-height: 1.55;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 body::before {
   content: "";
   position: fixed;
@@ -101,6 +113,55 @@ select {
   font-size: 0.875rem;
 }
 
+.demo-banner {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 56px;
+  padding: 6px max(20px, calc((100vw - 1200px) / 2));
+  border-bottom: 2px solid var(--ink);
+  color: var(--surface);
+  background: var(--cyan-deep);
+  box-shadow: 0 4px 0 rgba(23, 33, 29, 0.2);
+}
+
+.demo-banner p {
+  margin: 0;
+}
+
+.demo-banner div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.demo-banner button,
+.demo-banner a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 2px solid var(--surface);
+  color: var(--surface);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.demo-banner button:hover,
+.demo-banner a:hover {
+  color: var(--ink);
+  background: var(--mustard);
+}
+
 .masthead {
   display: flex;
   align-items: center;
@@ -145,6 +206,8 @@ footer nav a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
+  min-width: 44px;
+  justify-content: center;
   color: var(--ink);
   font-size: 0.875rem;
   font-weight: 700;
@@ -222,6 +285,7 @@ h3 {
   border: 2px solid var(--ink);
   background: var(--ink);
   box-shadow: 6px 6px 0 var(--cyan);
+  margin-top: 28px;
 }
 
 .install-strip code {
@@ -233,7 +297,7 @@ h3 {
 }
 
 .copy-button {
-  min-width: 76px;
+  min-width: 132px;
   min-height: 48px;
   border: 0;
   border-left: 2px solid var(--paper);
@@ -253,6 +317,14 @@ h3 {
   flex-wrap: wrap;
   gap: 16px;
   margin-top: 28px;
+}
+
+.hero-actions p {
+  align-self: center;
+  max-width: 30ch;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
 }
 
 .button {
@@ -298,6 +370,12 @@ h3 {
   color: var(--green);
   font-size: 0.8rem;
   font-weight: 800;
+  list-style: none;
+  padding: 0;
+}
+
+.proof-line li::before {
+  content: "✓ ";
 }
 
 .hero-art {
@@ -353,11 +431,23 @@ h3 {
   background: var(--ink);
 }
 
+.sequence-inner {
+  width: min(100% - 40px, 1200px);
+  margin: 0 auto;
+  padding-top: 48px;
+}
+
+.sequence h2 {
+  max-width: 760px;
+  color: var(--surface);
+  font-size: clamp(1.8rem, 3.5vw, 3rem);
+}
+
 .sequence ol {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  width: min(100% - 40px, 1200px);
-  margin: 0 auto;
+  width: 100%;
+  margin: 32px auto 0;
   padding: 0;
   list-style: none;
 }
@@ -620,6 +710,11 @@ pre {
   font-weight: 800;
 }
 
+.terminal .allowed {
+  color: #8fd7ac;
+  font-weight: 800;
+}
+
 .final-cta {
   padding: 112px max(20px, calc((100vw - 1200px) / 2));
   color: var(--surface);
@@ -654,6 +749,7 @@ footer {
   min-height: 110px;
   margin-inline: auto;
   font-size: 0.82rem;
+  padding-block: 20px;
 }
 
 footer p {
@@ -683,6 +779,13 @@ footer p {
   color: var(--muted);
 }
 
+.legal-main a:not(.button) {
+  display: inline-flex;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+
 .legal-main .effective {
   padding: 12px 0;
   border-block: 2px solid var(--ink);
@@ -695,14 +798,14 @@ footer p {
     min-height: 68px;
   }
 
-  .masthead nav a:not(:last-child) {
+  .masthead nav a:nth-child(n + 3) {
     display: none;
   }
 
   .hero {
     grid-template-columns: 1fr;
     min-height: auto;
-    padding: 56px 0 72px;
+    padding: 40px 0 64px;
   }
 
   .hero-copy {
@@ -755,6 +858,19 @@ footer p {
 }
 
 @media (max-width: 480px) {
+  .demo-banner {
+    position: sticky;
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 10px max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left));
+  }
+
+  .demo-banner div,
+  .demo-banner button,
+  .demo-banner a {
+    width: 100%;
+  }
+
   .masthead,
   .hero,
   .sequence ol,
@@ -769,7 +885,11 @@ footer p {
   }
 
   .masthead nav {
-    gap: 0;
+    gap: 12px;
+  }
+
+  .masthead nav a:nth-child(n + 2) {
+    display: none;
   }
 
   h1 {
@@ -788,6 +908,19 @@ footer p {
   .hero-actions,
   .hero-actions .button {
     width: 100%;
+  }
+
+  .hero-actions {
+    gap: 10px;
+  }
+
+  .hero-actions p {
+    width: 100%;
+  }
+
+  .proof-line {
+    display: grid;
+    gap: 4px;
   }
 
   .form-grid {

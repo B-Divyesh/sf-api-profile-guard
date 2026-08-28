@@ -1,0 +1,15 @@
+version = 1
+receipt_log = "receipts.jsonl"
+
+[profiles.production]
+env_file = "production.env"
+base_url_var = "API_BASE_URL"
+required = ["API_BASE_URL", "API_TOKEN"]
+credential_class = "live-sample"
+production = true
+acknowledgement = "production"
+allowed_hosts = ["api.example.com"]
+allow = ["POST /v1/orders"]
+deny = ["* /v1/admin/*"]
+required_json_fields = ["customer.id"]
+forbidden_json_fields = ["debug"]

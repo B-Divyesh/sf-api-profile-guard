@@ -1,0 +1,1 @@
+Block API requests to the wrong environment before your client starts.

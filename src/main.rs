@@ -7,6 +7,7 @@ use std::fs;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, ExitCode};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Debug, Parser)]
 #[command(
@@ -31,6 +32,9 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
+    /// Run a blocked and an allowed sample in an isolated temporary directory.
+    Demo,
+
     /// Evaluate and receipt a request without opening a network connection.
     Check(RequestArgs),
 
@@ -91,6 +95,7 @@ fn normalize_exit(code: i32) -> u8 {
 
 fn execute(cli: Cli) -> Result<i32, AppError> {
     match cli.command {
+        Commands::Demo => run_demo(cli.json),
         Commands::Check(request) => {
             let (_, decision) = preflight(&cli.config, &request)?;
             print_decision(&decision, cli.json, &mut io::stdout())?;
@@ -141,6 +146,88 @@ fn execute(cli: Cli) -> Result<i32, AppError> {
         }
     }
 }
+
+fn run_demo(json: bool) -> Result<i32, AppError> {
+    let nonce = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_err(|e| AppError(format!("could not create demo workspace name: {e}")))?
+        .as_nanos();
+    let workspace = std::env::temp_dir().join(format!("apg-demo-{}-{nonce}", std::process::id()));
+    fs::create_dir(&workspace).map_err(|e| {
+        AppError(format!(
+            "could not create demo workspace {}: {e}",
+            workspace.display()
+        ))
+    })?;
+    let config = workspace.join("apg.toml");
+    let environment = workspace.join("production.env");
+    let body = workspace.join("order.json");
+    fs::write(&config, DEMO_CONFIG)?;
+    fs::write(&environment, DEMO_ENVIRONMENT)?;
+    fs::write(&body, DEMO_BODY)?;
+
+    writeln!(io::stdout(), "API Profile Guard sample")?;
+    writeln!(io::stdout(), "  workspace: {}", workspace.display())?;
+    writeln!(io::stdout(), "  policy: {}", config.display())?;
+    writeln!(io::stdout(), "  environment: {}", environment.display())?;
+    writeln!(io::stdout(), "  request body: {}", body.display())?;
+
+    let blocked = RequestArgs {
+        profile: "production".into(),
+        method: "POST".into(),
+        url: "https://wrong.example/v1/orders".into(),
+        body_file: Some(body.clone()),
+        ack_production: Some("production".into()),
+    };
+    writeln!(io::stdout(), "\nSample 1 of 2 — wrong production host")?;
+    let (_, blocked_decision) = preflight(&config, &blocked)?;
+    print_decision(&blocked_decision, json, &mut io::stdout())?;
+
+    let allowed = RequestArgs {
+        profile: "production".into(),
+        method: "POST".into(),
+        url: "/v1/orders".into(),
+        body_file: Some(body),
+        ack_production: Some("production".into()),
+    };
+    writeln!(
+        io::stdout(),
+        "\nSample 2 of 2 — approved production request"
+    )?;
+    let (_, allowed_decision) = preflight(&config, &allowed)?;
+    print_decision(&allowed_decision, json, &mut io::stdout())?;
+    writeln!(
+        io::stdout(),
+        "\n  receipts: {}",
+        workspace.join("receipts.jsonl").display()
+    )?;
+    writeln!(
+        io::stdout(),
+        "Demo complete. Your current directory was not changed."
+    )?;
+    Ok(0)
+}
+
+const DEMO_CONFIG: &str = r#"version = 1
+receipt_log = "receipts.jsonl"
+
+[profiles.production]
+env_file = "production.env"
+base_url_var = "API_BASE_URL"
+required = ["API_BASE_URL", "API_TOKEN"]
+credential_class = "live-sample"
+production = true
+acknowledgement = "production"
+allowed_hosts = ["api.example.com"]
+allow = ["POST /v1/orders"]
+deny = ["* /v1/admin/*"]
+required_json_fields = ["customer.id"]
+forbidden_json_fields = ["debug"]
+"#;
+
+const DEMO_ENVIRONMENT: &str =
+    "API_BASE_URL=https://api.example.com\nAPI_TOKEN=sample-only-token\n";
+const DEMO_BODY: &str = "{\"customer\":{\"id\":\"cus_sample_1042\"},\"amount\":4900}\n";
 
 fn preflight(
     config_path: &Path,

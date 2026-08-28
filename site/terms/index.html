@@ -3,34 +3,53 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Terms of use for API Profile Guard." />
     <meta name="theme-color" content="#f4efd9" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="description" content="Read the MIT license terms, safety limits, acceptable use, and warranty notice for API Profile Guard." />
+    <meta property="og:title" content="Terms — API Profile Guard" />
+    <meta property="og:description" content="Read the license, safety limits, acceptable use, and warranty notice." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://api-profile-guard.sociobot.in/terms/" />
+    <meta property="og:image" content="https://api-profile-guard.sociobot.in/social-card.webp" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="A halftone inspection gate stops one unsafe API request stream." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Terms — API Profile Guard" />
+    <meta name="twitter:description" content="Read the license, safety limits, acceptable use, and warranty notice." />
+    <meta name="twitter:image" content="https://api-profile-guard.sociobot.in/social-card.webp" />
     <link rel="canonical" href="https://api-profile-guard.sociobot.in/terms/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="manifest" href="/manifest.json" />
     <title>Terms — API Profile Guard</title>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to main content</a>
+    <div id="route-status" class="visually-hidden" role="status" aria-live="polite"></div>
     <header class="masthead">
       <a class="brand" href="/" aria-label="API Profile Guard home"><svg aria-hidden="true" width="34" height="34" viewBox="0 0 34 34"><path d="M4 3h18v7h8v21H4z" fill="none" stroke="currentColor" stroke-width="3"/><path d="M10 18l4 4 10-11" fill="none" stroke="currentColor" stroke-width="3"/></svg><span><b>API</b> Profile Guard</span></a>
-      <nav aria-label="Primary navigation"><a href="/">Back home</a></nav>
+      <nav aria-label="Primary navigation"><a href="/?demo=1#simulator">Demo</a><a href="/#install">Install</a><a href="/#policy">Policy</a><a href="/privacy/">Privacy</a></nav>
     </header>
     <main id="main" class="legal-main">
       <p class="eyebrow">Open-source terms</p>
-      <h1>Terms</h1>
+      <h1 tabindex="-1">Terms for using API Profile Guard</h1>
       <p class="effective">Effective August 28, 2026</p>
-      <h2>License</h2>
-      <p>API Profile Guard is free software provided under the MIT License. The license in the repository controls your use, copying, modification, distribution, and warranty rights.</p>
-      <h2>Your responsibility</h2>
-      <p>The guard is a safety checkpoint, not an authorization system or network security boundary. You are responsible for your policies, profile files, credentials, child commands, target systems, and compliance obligations. Test production policy changes before relying on them.</p>
+      <h2>MIT license</h2>
+      <p>API Profile Guard is free software under the MIT License.</p>
+      <p>The repository license controls copying, modification, distribution, and warranty rights.</p>
+      <h2>Your production policies</h2>
+      <p>The guard checks the input you provide. It is not an authorization system or network security boundary.</p>
+      <p>You are responsible for policies, environment files, credentials, client commands, target systems, and legal obligations.</p>
       <h2>No warranty</h2>
-      <p>The software and website are provided “as is,” without warranty of any kind, to the maximum extent permitted by law. A passing preflight does not guarantee that a request is correct, authorized, reversible, or safe.</p>
+      <p>The software and website are provided “as is,” without warranty, to the maximum extent permitted by law.</p>
+      <p>A passing check does not prove that a request is authorized, reversible, or safe.</p>
       <h2>Acceptable use</h2>
-      <p>Use the project only with systems and credentials you are authorized to access. Do not use the public website or repository to distribute secrets, malicious payloads, or unlawful content.</p>
+      <p>Use the project only with systems and credentials you may access.</p>
+      <p>Do not place secrets, harmful payloads, or unlawful content in the public website or repository.</p>
       <h2>Changes</h2>
-      <p>Material policy changes will be dated on this page and recorded in the public repository. Continued use after a change means you accept the updated terms.</p>
+      <p>Material changes receive a new date here and a record in the public repository.</p>
     </main>
-    <footer><p><b>API Profile Guard</b> · MIT licensed.</p><nav aria-label="Legal navigation"><a href="/privacy/">Privacy</a><a href="/terms/" aria-current="page">Terms</a></nav></footer>
+    <footer><p><b>API Profile Guard</b> · Block wrong-environment API requests.</p><nav aria-label="Footer navigation"><a href="/privacy/">Privacy</a><a href="/terms/" aria-current="page">Terms</a><a href="https://github.com/B-Divyesh/sf-api-profile-guard">Source</a></nav><p>Built by Param Factory · v0.1.0+repair.1</p></footer>
     <script type="module" src="/legal.js"></script>
   </body>
 </html>

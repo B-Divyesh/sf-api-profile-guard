@@ -21,7 +21,7 @@ try {
     page.on('pageerror', (error) => errors.push(String(error)))
     page.on('request', (request) => requestOrigins.add(new URL(request.url()).origin))
 
-    for (const path of ['/', '/privacy/', '/terms/']) {
+    for (const path of ['/', '/demo/', '/privacy/', '/terms/']) {
       const response = await page.goto(new URL(path, baseUrl).href, { waitUntil: 'networkidle' })
       assert.equal(response.status(), 200, `${name} ${path} status`)
       const serious = (await new AxeBuilder({ page }).analyze()).violations.filter(({ impact }) =>
@@ -74,10 +74,10 @@ try {
       await new Promise((resolve) => navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true }))
     }
   })
-  assert.deepEqual(await page.evaluate(() => caches.keys()), ['apg-field-guide-v3'])
+  assert.deepEqual(await page.evaluate(() => caches.keys()), ['apg-field-guide-v4'])
   await context.setOffline(true)
   await page.reload({ waitUntil: 'domcontentloaded' })
-  assert.equal(await page.locator('h1').textContent(), 'Know where the request is going.')
+  assert.equal(await page.locator('h1').textContent(), 'Block API requests to the wrong environment')
   await context.setOffline(false)
   await context.close()
 

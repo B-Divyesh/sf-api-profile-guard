@@ -4,19 +4,36 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#f4efd9" />
-    <meta name="description" content="A local CLI preflight that blocks API requests aimed at the wrong environment before any network connection opens." />
-    <meta property="og:title" content="API Profile Guard — know where the request is going" />
-    <meta property="og:description" content="Resolve the profile. Inspect the policy. Release the request." />
+    <meta name="description" content="A local CLI that blocks API requests when the environment, host, operation, or production confirmation does not match policy." />
+    <meta property="og:title" content="API Profile Guard — block wrong-environment requests" />
+    <meta property="og:description" content="Check an API request against local policy before your client starts." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/preflight-gate.webp" />
+    <meta property="og:url" content="https://api-profile-guard.sociobot.in/" />
+    <meta property="og:image" content="https://api-profile-guard.sociobot.in/social-card.webp" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="A halftone inspection gate stops one unsafe API request stream." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="API Profile Guard — block wrong-environment requests" />
+    <meta name="twitter:description" content="Check an API request against local policy before your client starts." />
+    <meta name="twitter:image" content="https://api-profile-guard.sociobot.in/social-card.webp" />
     <link rel="canonical" href="https://api-profile-guard.sociobot.in/" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
     <link rel="manifest" href="/manifest.json" />
-    <title>API Profile Guard — local preflight for safer API requests</title>
+    <title>API Profile Guard — block wrong-environment requests</title>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to main content</a>
+    <div id="route-status" class="visually-hidden" role="status" aria-live="polite"></div>
     <div id="network-status" class="network-status" role="status" hidden></div>
+    <aside id="demo-banner" class="demo-banner" aria-label="Demo controls" hidden>
+      <p><strong>Demo</strong> — sample data, nothing is saved</p>
+      <div>
+        <button id="reset-demo" type="button">Reset demo</button>
+        <a id="leave-demo" href="/">Start for real</a>
+      </div>
+    </aside>
     <header class="masthead">
       <a class="brand" href="/" aria-label="API Profile Guard home">
         <svg aria-hidden="true" width="34" height="34" viewBox="0 0 34 34">
@@ -26,52 +43,60 @@
         <span><b>API</b> Profile Guard</span>
       </a>
       <nav aria-label="Primary navigation">
-        <a href="#simulator">Try preflight</a>
-        <a href="#policy">Policy model</a>
-        <a href="https://github.com/B-Divyesh/sf-api-profile-guard">Source</a>
+        <a href="/?demo=1#simulator">Demo</a>
+        <a href="/#install">Install</a>
+        <a href="/#policy">Policy</a>
+        <a href="/privacy/">Privacy</a>
       </nav>
     </header>
 
     <main id="main">
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <p class="eyebrow"><span>Local safety checkpoint</span> / v0.1.0</p>
-          <h1 id="hero-title">Know where the request is going.</h1>
-          <p class="lede">Resolve the profile. Inspect the policy. Release the request—only when host, operation, body, and credential class agree.</p>
-          <div class="install-strip" aria-label="Install command">
-            <code id="install-command" tabindex="0" aria-label="Git install command; scroll horizontally to read the complete command">cargo install --git https://github.com/B-Divyesh/sf-api-profile-guard.git --locked api-profile-guard</code>
-            <button class="copy-button" type="button" data-copy="#install-command">Copy</button>
-          </div>
+          <p class="eyebrow"><span>Local request guard</span> / v0.1.0</p>
+          <h1 id="hero-title" tabindex="-1">Block API requests to the wrong environment</h1>
+          <p class="lede">For developers switching dev, staging, and production before they run a request.</p>
           <div class="hero-actions">
-            <a class="button primary" href="#simulator">Try the preflight</a>
-            <a class="button text-link" href="https://github.com/B-Divyesh/sf-api-profile-guard">Read the source <span aria-hidden="true">↗</span></a>
+            <a class="button primary" href="/?demo=1#simulator">Try it with sample data</a>
+            <p>See a blocked production request now.</p>
           </div>
-          <p class="proof-line"><span>✓ no account</span><span>✓ no telemetry</span><span>✓ no secret upload</span></p>
+          <ul class="proof-line" aria-label="Product facts">
+            <li>Runs on your machine</li>
+            <li>No account</li>
+            <li>Free, MIT licensed</li>
+          </ul>
+          <div id="install" class="install-strip" aria-label="Install command">
+            <code id="install-command" tabindex="0" aria-label="Git install command; scroll horizontally to read the complete command">cargo install --git https://github.com/B-Divyesh/sf-api-profile-guard.git --locked api-profile-guard</code>
+            <button class="copy-button" type="button" data-copy="#install-command">Copy install command</button>
+          </div>
         </div>
         <figure class="hero-art">
-          <img src="/preflight-gate.webp" srcset="/preflight-gate-720.webp 720w, /preflight-gate.webp 1200w" sizes="(max-width: 800px) calc(100vw - 52px), (max-width: 1260px) 48vw, 560px" width="1200" height="800" alt="Three streams of request tokens meet a mechanical inspection gate; one safe stream passes while a red stop paddle blocks another." fetchpriority="high" />
-          <figcaption><b>Fig. 01</b> The guard opens only after the resolved profile matches policy.</figcaption>
+          <img src="/preflight-gate.webp" srcset="/preflight-gate-720.webp 720w, /preflight-gate.webp 1200w" sizes="(max-width: 800px) calc(100vw - 52px), (max-width: 1260px) 48vw, 560px" width="1200" height="800" alt="Three API request streams meet an inspection gate; one safe stream passes while a stop paddle blocks another." fetchpriority="high" />
+          <figcaption><b>Fig. 01</b> The guard checks local policy before your API client starts.</figcaption>
         </figure>
       </section>
 
-      <section class="sequence" aria-label="Three-stage preflight">
-        <ol>
-          <li><span>01</span><strong>Resolve</strong><small>Literal dotenv, required keys, credential class</small></li>
-          <li><span>02</span><strong>Inspect</strong><small>Exact host, method + path, JSON body fields</small></li>
-          <li><span>03</span><strong>Release</strong><small>Explicit production phrase, then spawn client</small></li>
-        </ol>
+      <section class="sequence" aria-labelledby="steps-title">
+        <div class="sequence-inner">
+          <h2 id="steps-title">Check a request in three steps</h2>
+          <ol>
+            <li><span>01</span><strong>Read</strong><small>Open the named environment file as text.</small></li>
+            <li><span>02</span><strong>Check</strong><small>Match the host, operation, body, and production phrase.</small></li>
+            <li><span>03</span><strong>Run</strong><small>Start the API client only when every check passes.</small></li>
+          </ol>
+        </div>
       </section>
 
       <section id="simulator" class="simulator section-grid" aria-labelledby="simulator-title">
         <div class="section-heading">
-          <p class="section-number">Field test / 02</p>
-          <h2 id="simulator-title">Run a local preflight</h2>
-          <p>This simulator mirrors the CLI’s deny-first decision order. It makes no request and stores nothing.</p>
+          <p class="section-number">Sample check / 02</p>
+          <h2 id="simulator-title" tabindex="-1">Check a request in your browser</h2>
+          <p>The sample follows the CLI policy order. It does not start a client or send a request.</p>
         </div>
         <form id="preflight-form" class="preflight-panel">
           <div class="form-grid">
             <div class="field">
-              <label for="profile">Profile</label>
+              <label for="profile">Environment</label>
               <select id="profile" name="profile">
                 <option value="development">development · test</option>
                 <option value="staging">staging · test</option>
@@ -91,21 +116,21 @@
             <div class="field url-field">
               <label for="request-url">URL or path</label>
               <input id="request-url" name="request-url" value="/v1/orders" required spellcheck="false" aria-describedby="url-hint" />
-              <small id="url-hint">Try a forbidden host: https://wrong.example/v1/orders</small>
+              <small id="url-hint">Use an absolute URL to check its host.</small>
             </div>
             <div id="acknowledgement-field" class="field ack-field" hidden>
-              <label for="acknowledgement">Production phrase</label>
+              <label for="acknowledgement">Production confirmation phrase</label>
               <input id="acknowledgement" name="acknowledgement" autocomplete="off" spellcheck="false" aria-describedby="ack-hint" />
-              <small id="ack-hint">Type production exactly. No confirmation dialog.</small>
+              <small id="ack-hint">Type “production” exactly.</small>
             </div>
           </div>
-          <button id="inspect-button" class="button primary inspect-button" type="submit">Inspect request</button>
+          <button id="inspect-button" class="button primary inspect-button" type="submit">Check request</button>
         </form>
         <div id="preflight-result" class="result-sheet" data-state="empty" aria-live="polite" aria-atomic="true">
           <p id="result-stamp" class="result-stamp">READY</p>
           <div>
-            <h3 id="result-title">No request inspected yet.</h3>
-            <p id="result-details">Choose a profile and operation, then run the policy check.</p>
+            <h3 id="result-title">No request checked yet</h3>
+            <p id="result-details">Choose an environment and operation. Then check the request.</p>
             <ul id="result-reasons"></ul>
           </div>
         </div>
@@ -113,13 +138,13 @@
 
       <section id="policy" class="policy-section section-grid" aria-labelledby="policy-title">
         <div class="section-heading">
-          <p class="section-number">Policy plate / 03</p>
-          <h2 id="policy-title">Production is not a color.</h2>
-          <p>A theme can be missed. A failing policy cannot. Production requires an exact host, an explicit operation allowlist, and a typed acknowledgement.</p>
+          <p class="section-number">Production policy / 03</p>
+          <h2 id="policy-title">Require a confirmation for production requests</h2>
+          <p>Production requests need an exact host, an allowed operation, and the configured production confirmation phrase.</p>
         </div>
         <div class="policy-specimen">
           <div class="specimen-bar"><span>apg.toml</span><span>local / reviewable</span></div>
-          <pre tabindex="0" aria-label="Production profile example"><code><span class="comment"># Secrets stay in .env.prod</span>
+          <pre tabindex="0" aria-label="Production environment policy example"><code><span class="comment"># Secrets stay in .env.prod</span>
 [profiles.production]
 env_file = <span class="string">".env.prod"</span>
 required = [<span class="string">"API_BASE_URL"</span>, <span class="string">"API_TOKEN"</span>]
@@ -132,42 +157,46 @@ allow = [<span class="string">"GET /v1/*"</span>, <span class="string">"POST /v1
 deny = [<span class="string">"* /v1/admin/*"</span>]</code></pre>
         </div>
         <div class="guard-claims">
-          <article><span aria-hidden="true">⊘</span><h3>No shell evaluation</h3><p>Dotenv values are parsed as literals. Expansion and substitution are rejected.</p></article>
-          <article><span aria-hidden="true">⌁</span><h3>No secret receipts</h3><p>Receipts record the decision and non-secret fingerprint—not headers, values, queries, or bodies.</p></article>
-          <article><span aria-hidden="true">↯</span><h3>No early connection</h3><p><code>apg run</code> does not spawn curl, Bruno, or your script until every check passes.</p></article>
+          <article><span aria-hidden="true">⊘</span><h3>Read environment files as text</h3><p>APG rejects shell expansion and command substitution.</p></article>
+          <article><span aria-hidden="true">⌁</span><h3>Save receipts without request values</h3><p>Receipts exclude environment values, headers, query strings, and request bodies.</p></article>
+          <article><span aria-hidden="true">↯</span><h3>Block before the client starts</h3><p>A blocked run does not start curl, Bruno, or your script.</p></article>
         </div>
       </section>
 
       <section class="terminal-section section-grid" aria-labelledby="terminal-title">
         <div class="section-heading">
-          <p class="section-number">Release record / 04</p>
-          <h2 id="terminal-title">A receipt you can keep. Nothing you need to hide.</h2>
-          <p>JSON decisions and JSONL receipts fit CI without sending your request history anywhere. Allowed runs keep child stdout clean for response pipelines.</p>
+          <p class="section-number">CLI demo / 04</p>
+          <h2 id="terminal-title">Run the bundled CLI sample</h2>
+          <p><code>apg demo</code> creates a temporary workspace. It shows one blocked request and one allowed request.</p>
         </div>
         <div class="terminal">
-          <pre role="region" aria-label="Example terminal output" tabindex="0"><code><span class="prompt">$</span> apg check --profile production --method DELETE \
-    --url /v1/users/42 --ack-production production
+          <div class="specimen-bar"><span>Recorded from apg demo</span><span>sample only</span></div>
+          <pre role="region" aria-label="Terminal recording of the bundled CLI demo" tabindex="0"><code><span class="prompt">$</span> apg demo
+API Profile Guard sample
+  workspace: /tmp/apg-demo-…
 
+Sample 1 of 2 — wrong production host
 <span class="blocked">✕ BLOCKED</span>  production · 8C31F2A091E4
-  DELETE api.example.com/v1/users/42
-  <span class="reason">- operation_not_allowed</span>
-  receipt: .apg/receipts.jsonl
+  - host_not_allowed
 
-<span class="quiet">No child process started. No network connection opened.</span></code></pre>
+Sample 2 of 2 — approved production request
+<span class="allowed">✓ ALLOWED</span>  production · 8C31F2A091E4
+  receipts: /tmp/apg-demo-…/receipts.jsonl</code></pre>
         </div>
       </section>
 
       <section class="final-cta" aria-labelledby="cta-title">
-        <p class="eyebrow">One binary / zero accounts</p>
-        <h2 id="cta-title">Put a gate in front of production.</h2>
-        <p>Open source, MIT licensed, and designed to wrap the clients you already use.</p>
-        <a class="button primary inverse" href="https://github.com/B-Divyesh/sf-api-profile-guard">Get API Profile Guard <span aria-hidden="true">↗</span></a>
+        <p class="eyebrow">One binary / no account</p>
+        <h2 id="cta-title">Install the production request guard</h2>
+        <p>Build the MIT-licensed Rust binary from the public source.</p>
+        <a class="button primary inverse" href="https://github.com/B-Divyesh/sf-api-profile-guard">Install from source <span aria-hidden="true">↗</span></a>
       </section>
     </main>
 
     <footer>
-      <p><b>API Profile Guard</b> · Built by the Param Factory.</p>
-      <nav aria-label="Legal navigation"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-api-profile-guard/blob/main/LICENSE">MIT license</a></nav>
+      <p><b>API Profile Guard</b> · Block wrong-environment API requests.</p>
+      <nav aria-label="Footer navigation"><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="https://github.com/B-Divyesh/sf-api-profile-guard">Source</a></nav>
+      <p>Built by Param Factory · v0.1.0+repair.1</p>
     </footer>
     <script type="module" src="/main.js"></script>
   </body>

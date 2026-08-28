@@ -1,0 +1,11 @@
+{
+  "slug": "api-profile-guard",
+  "title": "API Profile Guard",
+  "territory": "devtools-data",
+  "user": "Developers switching API requests among development, staging, and production who need an unmistakable, policy-checked preflight before a request uses the wrong base URL, environment file, or credential class.",
+  "smallest_useful_product": "A local proxy/CLI wrapper that resolves named env files, displays a non-secret profile fingerprint, validates host/method/path/body policies, requires an explicit production acknowledgement, and logs a no-value receipt.",
+  "success_measure": "In a seeded test set, the guard blocks 100% of requests aimed at a forbidden production host or missing required profile variable before any network connection is opened.",
+  "artifact_class": "cli",
+  "monetization": "free",
+  "constraints": "Never log headers or bodies by default; profile parsing must not execute shell expressions; provide explicit allowlists for production operations; work without a network connection except for the guarded request."
+}

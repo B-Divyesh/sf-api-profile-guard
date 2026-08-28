@@ -4,8 +4,8 @@
 
 Repaired every blocking and minor finding in `.factory/review-1.md` while keeping
 the Rust CLI and static-site deployment model. The approved pressroom visual system
-remains intact. Implementation commits: `04264bcae377e43c2700acf52f73df1efccf9064`
-and demo-exit cleanup `a4f8d5a04bfb47d4a1dd00fce86f3bda83406c73`.
+remains intact. Final implementation commit:
+`e0a8fd9c223df336ec1054b081387dc1d6ce2046`.
 
 ## What changed
 
@@ -18,7 +18,9 @@ and demo-exit cleanup `a4f8d5a04bfb47d4a1dd00fce86f3bda83406c73`.
 - Added `/?demo=1` and `/demo/`. Demo mode starts with the blocked production
   sample, displays the persistent required banner, and provides Reset demo and
   Start for real controls. Only `demo:api-profile-guard:sample-v1` session storage
-  is used; leaving removes it without reading or changing other storage.
+  is used; leaving removes it without reading or changing other storage. The
+  first-screen action opens the self-hosted recording of the real CLI sample and
+  transfers keyboard focus to its heading.
 - Added `.factory/claims.json` with 15 material claims and exactly one tagged test
   per claim. Added `.factory/demo.md` and bundled fixtures under `examples/demo/`.
 - Reworked headings and labels into plain instructions. Added the full sentence
@@ -35,8 +37,8 @@ and demo-exit cleanup `a4f8d5a04bfb47d4a1dd00fce86f3bda83406c73`.
 
 ## Clean-clone evidence
 
-Verification used fresh clone `/tmp/apg-polish-clean.OWac5D/repo`, detached at
-`a4f8d5a04bfb47d4a1dd00fce86f3bda83406c73`, after `npm ci` installed 20 packages
+Verification used fresh clone `/tmp/apg-polish-final.hZYGx4/repo`, at
+`e0a8fd9c223df336ec1054b081387dc1d6ce2046`, after `npm ci` installed 20 packages
 with 0 vulnerabilities.
 
 - Every one of the 15 `.factory/claims.json` commands: PASS independently. Each
@@ -48,23 +50,24 @@ with 0 vulnerabilities.
   denied.
 - `npm run build`: PASS — generated `dist/site/`, including `demo/index.html`, all
   legal/error routes, deployment config, and offline shell.
-- `npm run test:e2e`: PASS — 25 browser cases passed and 17 intentional duplicate
+- `npm run test:e2e`: PASS — 27 browser cases passed and 17 intentional duplicate
   project cases skipped across desktop Chromium and 390×844 mobile Chromium.
-  Coverage includes all five authored routes, axe, keyboard operation, focus
-  transfer, 44 px targets, no horizontal overflow, console errors, privacy,
-  isolated reset/exit behavior, and offline reload.
+  Coverage includes all five authored routes, axe, keyboard operation, both
+  navigation and first-screen focus transfer, 44 px targets, no horizontal
+  overflow, console errors, privacy, isolated reset/exit behavior, and offline
+  reload.
 - `cargo build --release`: PASS — produced the single release binary.
 - `cargo package`: PASS — 18 files, 82.2 KiB unpacked and 23.8 KiB compressed;
   Cargo also compiled the packaged crate.
 
 ## Local browser and performance evidence
 
-- Factory `verify-url.sh` against the production preview: PASS — HTTP 200,
+- Factory `verify-url.sh` against the live custom domain: PASS — HTTP 200,
   `lang=en`, one H1, main landmark, zero missing alt attributes, zero unlabeled
-  buttons, and zero console/page errors; measured load was 536 ms.
+  buttons, and zero console/page errors; measured load was 561 ms.
 - Lighthouse 12.8.2 mobile: performance 100, accessibility 100, best practices
   100, SEO 100; FCP 1.0 s, LCP 1.6 s, TBT 0 ms, CLS 0, total transfer 61 KiB.
-- Production payload: initial app JavaScript 6,444 bytes, all JavaScript 7,964
+- Production payload: initial app JavaScript 6,493 bytes, all JavaScript 8,012
   bytes, CSS 13,141 bytes, mobile hero 49,178 bytes, large hero 148,256 bytes,
   and no font downloads.
 - Full-page 390×844 home and demo images plus the 1440×900 first screen were
@@ -97,9 +100,9 @@ uploads `dist/site/`.
 
 - Deployed `dist/site/` through `/opt/fleet/lib/deploy-static.sh` using work-order
   slug `api-profile-guard`. Final Azure deployment ID:
-  `57640a2a-622e-41c3-8477-c1d2d1478f53`.
+  `70402cee-1f05-45aa-b949-0f1249c89b3c`.
 - Live URL: `https://api-profile-guard.sociobot.in`.
-- Live factory verification: PASS — HTTPS 200, 704 ms measured load, correct title,
+- Live factory verification: PASS — HTTPS 200, 561 ms measured load, correct title,
   `lang=en`, one H1, main landmark, no missing alt text, no unlabeled buttons, and
   zero console/page errors.
 - Live browser suite: PASS at desktop and 390×844 — all tested requests stayed
@@ -109,7 +112,7 @@ uploads `dist/site/`.
   returned 200. `/does-not-exist` returned the authored 404 with status 404.
 - Live policy: CSP, Permissions-Policy, Referrer-Policy, and `nosniff` are present;
   hashed assets return one-year immutable caching and `sw.js` returns `no-cache`.
-- The live HTML references final app asset `home-hMZqc3ne.js`.
+- The live HTML references final app asset `home-DAVPKYPF.js`.
 
 ## Known gaps and next steps
 
